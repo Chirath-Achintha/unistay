@@ -65,4 +65,30 @@ public class UserController {
         result.put("registered", registered);
         return ResponseEntity.ok(ApiResponseDTO.success("Email status retrieved", result));
     }
+
+    /**
+     * POST /api/users/login
+     * Authenticates a user (Student or Owner).
+     */
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> login(
+            @RequestBody Map<String, String> credentials) {
+        String email = credentials.get("email");
+        String password = credentials.get("password");
+
+        if (email == null || password == null) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponseDTO.error("Email and password are required."));
+        }
+
+        try {
+            UserResponseDTO user = userService.login(email, password);
+            return ResponseEntity.ok(ApiResponseDTO.success("Login successful", user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponseDTO.error(e.getMessage()));
+        }
+    }
 }

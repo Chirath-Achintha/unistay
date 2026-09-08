@@ -33,7 +33,7 @@ public class AdminStudentService {
     public List<UserResponseDTO> getStudents(String search) {
         List<User> students;
         if (search != null && !search.trim().isEmpty()) {
-            students = userRepository.searchStudents(search.trim());
+            students = userRepository.searchStudents(UserRole.STUDENT, search.trim());
         } else {
             students = userRepository.findByRole(UserRole.STUDENT);
         }

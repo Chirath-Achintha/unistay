@@ -23,10 +23,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByRole(UserRole role);
 
     /**
-     * Find all students whose name OR email contains the given search term (case-insensitive).
+     * Search students by full name or email (case-insensitive).
      */
-    @Query("SELECT u FROM User u WHERE u.role = 'STUDENT' AND " +
+    @Query("SELECT u FROM User u WHERE u.role = :role AND " +
            "(LOWER(u.fullName) LIKE LOWER(CONCAT('%', :term, '%')) OR " +
            "LOWER(u.email) LIKE LOWER(CONCAT('%', :term, '%')))")
-    List<User> searchStudents(@Param("term") String term);
+    List<User> searchStudents(@Param("role") UserRole role, @Param("term") String term);
 }

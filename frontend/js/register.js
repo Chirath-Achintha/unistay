@@ -87,12 +87,13 @@ async function handleStudentSubmit(event) {
         setLoading(btnSubmit, true, 'Registering...');
         const response = await API.post('/users/register/student', payload);
         
-        showAlert(`Success! Welcome to UniStay, ${response.data.fullName}. Your student account has been created.`, 'success');
-        document.getElementById('student-form').reset();
+        showAlert(`Success! Welcome to UniStay, ${response.data.fullName}. Redirecting to login...`, 'success');
         
-        if (typeof showToast === 'function') {
-            showToast('Student registration successful!', 'success');
-        }
+        // Redirect to login page after a short delay
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        
     } catch (error) {
         showAlert(error.message || 'Registration failed. Please check your inputs.', 'danger');
     } finally {
@@ -137,12 +138,13 @@ async function handleOwnerSubmit(event) {
         setLoading(btnSubmit, true, 'Registering...');
         const response = await API.post('/users/register/owner', payload);
 
-        showAlert(`Success! Welcome aboard, ${response.data.fullName}. Your Boarding Owner account has been created.`, 'success');
-        document.getElementById('owner-form').reset();
+        showAlert(`Success! Welcome aboard, ${response.data.fullName}. Redirecting to login...`, 'success');
 
-        if (typeof showToast === 'function') {
-            showToast('Owner registration successful!', 'success');
-        }
+        // Redirect to login page after a short delay
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+
     } catch (error) {
         showAlert(error.message || 'Registration failed. Please check your inputs.', 'danger');
     } finally {

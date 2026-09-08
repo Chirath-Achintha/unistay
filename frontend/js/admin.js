@@ -36,7 +36,7 @@ function getAdminEmail() {
  */
 function checkAdminAuth() {
     if (!getAdminToken()) {
-        window.location.href = './admin-login.html';
+        window.location.href = './login.html';
     }
 }
 
@@ -67,7 +67,7 @@ async function logout() {
         // Ignore errors — always clear session locally
     }
     clearAdminSession();
-    window.location.href = './admin-login.html';
+    window.location.href = './login.html';
 }
 
 // -------------------------------------------------------
@@ -103,7 +103,7 @@ const adminAPI = (function () {
         if (response.status === 401) {
             // Session expired – redirect to login
             clearAdminSession();
-            window.location.href = './admin-login.html';
+            window.location.href = './login.html';
             throw new Error('Session expired');
         }
 

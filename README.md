@@ -142,7 +142,7 @@ Backend — run this in one terminal:
 
 powershell
 cd "d:\projects\ISPM Web\unistay\backend"
-.\mvnw.cmd spring-boot:run
+python -m http.server 5500
 
 
 

@@ -78,4 +78,19 @@ public class UserService {
         }
         return userRepository.existsByEmail(email.toLowerCase().trim());
     }
+
+    /**
+     * Authenticates a user by email and password.
+     */
+    @Transactional(readOnly = true)
+    public UserResponseDTO login(String email, String rawPassword) {
+        User user = userRepository.findByEmail(email.toLowerCase().trim())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password."));
+        
+        if (!PasswordUtil.verifyPassword(rawPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid email or password.");
+        }
+        
+        return new UserResponseDTO(user);
+    }
 }
