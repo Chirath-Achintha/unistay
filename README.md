@@ -135,3 +135,65 @@ Double-click `frontend/index.html` to open directly in your browser.
 - [ ] Room Requests
 - [ ] Reviews & Ratings
 - [ ] Admin Dashboard
+
+
+
+Backend — run this in one terminal:
+
+powershell
+cd "d:\projects\ISPM Web\unistay\backend"
+.\mvnw.cmd spring-boot:run
+
+
+
+Frontend — run this in a second terminal:
+
+powershell
+cd "d:\projects\ISPM Web\unistay\frontend"
+python -m http.server 5500
+
+
+
+Then open:
+
+Frontend → http://localhost:5500
+Health check → http://localhost:8080/api/health
+
+
+
+
+
+git push 
+
+From now on
+
+Every time you finish a meaningful feature, do:
+
+git add .
+git commit -m "Your feature description"
+git push
+
+For example, after finishing the landing page:
+
+git add .
+git commit -m "Add UniStay landing page"
+git push
+
+After registration:
+
+git add .
+git commit -m "Add user registration"
+git push
+If you already ran some Git commands
+
+If you get:
+
+error: remote origin already exists
+
+Don't panic. Just run:
+
+git remote set-url origin https://github.com/Chirath-Achintha/unistay.git
+
+Then:
+
+git remote -v
