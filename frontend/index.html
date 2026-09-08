@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UniStay – Find Student Accommodation</title>
+  <meta name="description" content="UniStay helps university students find safe, verified, and affordable accommodation close to campus." />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Design System -->
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+
+  <style>
+    /* ── Landing Page–specific overrides (kept minimal) ── */
+
+    /* Inline hero status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: var(--radius-full);
+      padding: 5px 14px;
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: var(--space-lg);
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .4; }
+    }
+
+    /* Search bar */
+    .search-bar {
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      padding: 1.5rem;
+      margin-top: -3rem;
+      position: relative;
+      z-index: 10;
+      border: 1px solid var(--border-color);
+    }
+    .search-bar form {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 1rem;
+      align-items: end;
+    }
+    .search-field label {
+      display: block;
+      font-size: var(--font-size-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    /* Feature cards */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-lg);
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl) var(--space-lg);
+      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: #bfdbfe;
+    }
+    .feature-icon-box {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: var(--space-md);
+    }
+    .icon-blue   { background: var(--primary-light); }
+    .icon-teal   { background: var(--secondary-light); }
+    .icon-amber  { background: var(--accent-light); }
+    .icon-purple { background: #f3e8ff; }
+
+    /* Backend status banner */
+    #backend-status {
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      display: none;
+    }
+    #backend-status.online  { background: var(--success-bg); color: #065f46; display: inline-flex; align-items: center; gap: 6px; }
+    #backend-status.offline { background: var(--danger-bg);  color: #991b1b; display: inline-flex; align-items: center; gap: 6px; }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .search-bar form { grid-template-columns: 1fr; }
+      .search-bar form button { width: 100%; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       NAVBAR
+       ═══════════════════════════════════════════ -->
+  <header class="navbar" id="top">
+    <div class="container">
+
+      <!-- Brand -->
+      <a href="index.html" class="navbar-brand" id="navbar-brand">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Uni<span>Stay</span>
+      </a>
+
+      <!-- Mobile toggle -->
+      <button class="mobile-menu-btn" id="mobile-menu-btn"
+              aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+
+      <!-- Nav links -->
+      <ul class="navbar-nav" id="main-nav">
+        <li><a href="index.html"         class="nav-link active"  id="nav-home">Home</a></li>
+        <li><a href="#find-boarding"     class="nav-link"          id="nav-find">Find Boarding</a></li>
+        <li><a href="#about"             class="nav-link"          id="nav-about">About</a></li>
+      </ul>
+
+      <!-- Action buttons + backend status indicator -->
+      <div class="navbar-actions">
+        <span id="backend-status" title="Backend connection status"></span>
+        <a href="pages/register.html?role=student" class="btn btn-outline btn-sm" id="btn-login">Login</a>
+        <a href="pages/register.html"              class="btn btn-primary btn-sm" id="btn-register">Register</a>
+      </div>
+
+    </div>
+  </header>
+
+
+  <main>
+
+    <!-- ═══════════════════════════════════════════
+         HERO
+         ═══════════════════════════════════════════ -->
+    <section class="hero" id="hero-section">
+      <div class="container">
+        <div class="hero-content">
+
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            Verified Student Housing Platform
+          </div>
+
+          <h1 class="hero-title">
+            Find Your Perfect<br/>Student Accommodation
+          </h1>
+
+          <p class="hero-subtitle">
+            Browse safe, verified, and affordable rooms near your campus.
+            Connect directly with boarding owners – no hidden fees.
+          </p>
+
+          <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <a href="#find-boarding" class="btn btn-primary btn-lg" id="btn-hero-search">
+              Search Rooms
+            </a>
+            <a href="#about" class="btn btn-outline btn-lg"
+               style="border-color:rgba(255,255,255,.35);color:#fff;" id="btn-hero-about">
+              Learn More
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════
+         SEARCH BAR
+         ═══════════════════════════════════════════ -->
+    <section class="container" id="find-boarding">
+      <div class="search-bar">
+
+        <p style="font-size:var(--font-size-xs);font-weight:700;text-transform:uppercase;
+                  letter-spacing:.06em;color:var(--text-muted);margin-bottom:1rem;">
+          Find Your Perfect Student Accommodation
+        </p>
+
+        <form id="search-form" onsubmit="handleSearch(event)">
+
+          <div class="search-field">
+            <label for="s-location">University / City</label>
+            <select id="s-location" class="form-select">
+              <option value="">Any Location</option>
+              <option>City University of Technology</option>
+              <option>National State University</option>
+              <option>Metropolitan Institute of Science</option>
+              <option>Greenwood College</option>
+            </select>
+          </div>
+
+          <div class="search-field">
+            <label for="s-type">Room Type</label>
+            <select id="s-type" class="form-select">
+              <option value="">Any Type</option>
+              <option>Single Room</option>
+              <option>Shared Room</option>
+              <option>Private Studio</option>
+              <option>Apartment</option>
+            </select>
+          </div>
+
+          <div class="search-field">
+            <label for="s-budget">Max Budget / Month</label>
+            <select id="s-budget" class="form-select">
+              <option value="">Any Budget</option>
+              <option>Under $400</option>
+              <option>Under $600</option>
+              <option>Under $800</option>
+              <option>Under $1,000</option>
+            </select>
+          </div>
+
+          <div>
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-search"
+                    style="white-space:nowrap; width:100%;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Search
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════
+         FEATURE CARDS
+         ═══════════════════════════════════════════ -->
+    <section style="padding: 5rem 0 4rem;" id="features">
+      <div class="container">
+
+        <div class="text-center" style="margin-bottom:3rem;">
+          <h2>Why Students Choose UniStay</h2>
+          <p class="text-muted" style="max-width:520px;margin:0.5rem auto 0;">
+            Everything you need to find a safe, comfortable place to study and live.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+
+          <div class="feature-card">
+            <div class="feature-icon-box icon-blue">🛡️</div>
+            <h4>Verified Listings</h4>
+            <p class="text-muted" style="font-size:var(--font-size-sm);margin-top:.5rem;">
+              Every property is manually reviewed and verified before it appears on the platform.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box icon-teal">📍</div>
+            <h4>Close to Campus</h4>
+            <p class="text-muted" style="font-size:var(--font-size-sm);margin-top:.5rem;">
+              Search by university so you always find rooms within walking distance of your faculty.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box icon-amber">💡</div>
+            <h4>Bills Included</h4>
+            <p class="text-muted" style="font-size:var(--font-size-sm);margin-top:.5rem;">
+              Many listings include electricity, water, and high-speed Wi-Fi in the monthly rent.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box icon-purple">🤝</div>
+            <h4>Zero Booking Fees</h4>
+            <p class="text-muted" style="font-size:var(--font-size-sm);margin-top:.5rem;">
+              Contact boarding owners directly at no extra cost. Transparent pricing, always.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════
+         ABOUT / CTA
+         ═══════════════════════════════════════════ -->
+    <section id="about" style="background:var(--bg-alt); padding: 5rem 0;">
+      <div class="container">
+        <div style="max-width:640px; margin:0 auto; text-align:center;">
+          <span class="badge badge-primary" style="margin-bottom:1rem;">About UniStay</span>
+          <h2>Making Student Housing Simple</h2>
+          <p class="text-muted" style="margin:1rem 0 2rem;">
+            UniStay is a university accommodation platform that connects students with boarding
+            owners in a safe and transparent way. We verify every listing so you can focus on
+            your studies, not your housing search.
+          </p>
+          <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <a href="pages/register.html" class="btn btn-primary btn-lg" id="btn-cta-register">
+              Get Started – It's Free
+            </a>
+            <a href="pages/register.html?role=owner" class="btn btn-outline btn-lg" id="btn-cta-owner">
+              List Your Property
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div>
+          <h4 style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                 stroke="var(--secondary)" stroke-width="2.5">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            UniStay
+          </h4>
+          <p style="font-size:var(--font-size-sm);color:#94a3b8;max-width:300px;">
+            The trusted university accommodation platform for students and boarding owners.
+          </p>
+        </div>
+
+        <div>
+          <h5 style="margin-bottom:.75rem;">Navigation</h5>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:var(--font-size-sm);">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#find-boarding">Find Boarding</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 style="margin-bottom:.75rem;">Account</h5>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:var(--font-size-sm);">
+            <li><a href="pages/register.html?role=student">Student Registration</a></li>
+            <li><a href="pages/register.html?role=owner">Owner Registration</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 style="margin-bottom:.75rem;">Contact</h5>
+          <p style="font-size:var(--font-size-sm);color:#94a3b8;line-height:1.8;">
+            📧 support@unistay.edu<br/>
+            📞 +1 (800) UNISTAY<br/>
+            📍 Campus Student Center
+          </p>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 UniStay. All rights reserved.</span>
+        <span style="color:#475569;">Java 21 · Spring Boot · Vanilla JS</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════ -->
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    /* ── Search handler ── */
+    function handleSearch(e) {
+      e.preventDefault();
+      const loc    = document.getElementById('s-location').value || 'Any Location';
+      const type   = document.getElementById('s-type').value    || 'Any Type';
+      const budget = document.getElementById('s-budget').value  || 'Any Budget';
+      alert(`Searching for: ${type} near ${loc} (${budget})\n\nSearch module coming soon!`);
+    }
+
+    /* ── Backend health check (displays status pill in navbar) ── */
+    async function checkBackendStatus() {
+      const el = document.getElementById('backend-status');
+      try {
+        const res = await API.get('/health');
+        if (res && res.success) {
+          el.className = 'online';
+          el.innerHTML = '<span style="width:7px;height:7px;background:#4ade80;border-radius:50%;display:inline-block;"></span> API Online';
+        }
+      } catch (_) {
+        el.className = 'offline';
+        el.innerHTML = '<span style="width:7px;height:7px;background:#f87171;border-radius:50%;display:inline-block;"></span> API Offline';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', checkBackendStatus);
+  </script>
+
+</body>
+</html>
