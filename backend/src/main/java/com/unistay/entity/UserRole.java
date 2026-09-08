@@ -5,5 +5,6 @@ package com.unistay.entity;
  */
 public enum UserRole {
     STUDENT,
-    OWNER
+    OWNER,
+    ADMIN
 }

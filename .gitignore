@@ -1,0 +1,32 @@
+# ============================================================
+#  UniStay – .gitignore
+# ============================================================
+
+# --- Secrets / Environment Variables (NEVER commit these) ---
+.env
+.env.*
+!.env.example
+
+# --- Maven build outputs ---
+target/
+*.jar
+*.war
+*.class
+
+# --- IDE / Editor files ---
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# --- OS noise ---
+.DS_Store
+Thumbs.db
+
+# --- Spring Boot DevTools ---
+spring-devtools.properties
+
+# --- Log files ---
+*.log
+logs/

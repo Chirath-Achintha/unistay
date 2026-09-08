@@ -1,68 +1,35 @@
 package com.unistay.util;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Base64;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
- * Utility for hashing and verifying user passwords securely.
+ * Utility for hashing and verifying user passwords using BCrypt.
+ * BCrypt is industry-standard: it is slow by design (resistant to brute-force)
+ * and automatically handles salting internally.
  */
 public class PasswordUtil {
 
-    private static final int SALT_LENGTH = 16;
+    // BCryptPasswordEncoder with default strength (10 rounds) – good for a university project
+    private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
 
     /**
-     * Hashes raw text password using SHA-256 with a randomly generated salt.
-     * Returns string formatted as "salt:hash".
+     * Hashes a raw plaintext password using BCrypt.
+     * The returned string includes the salt and hash – safe to store directly in the DB.
      */
     public static String hashPassword(String rawPassword) {
         if (rawPassword == null || rawPassword.trim().isEmpty()) {
             throw new IllegalArgumentException("Password cannot be empty");
         }
-
-        try {
-            byte[] saltBytes = new byte[SALT_LENGTH];
-            SecureRandom random = new SecureRandom();
-            random.nextBytes(saltBytes);
-
-            String saltBase64 = Base64.getEncoder().encodeToString(saltBytes);
-            String hashBase64 = hashWithSalt(rawPassword, saltBytes);
-
-            return saltBase64 + ":" + hashBase64;
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
-        }
+        return ENCODER.encode(rawPassword);
     }
 
     /**
-     * Verifies raw text password against stored "salt:hash" string.
+     * Verifies a raw plaintext password against a stored BCrypt hash.
      */
     public static boolean verifyPassword(String rawPassword, String storedHash) {
-        if (rawPassword == null || storedHash == null || !storedHash.contains(":")) {
+        if (rawPassword == null || storedHash == null) {
             return false;
         }
-
-        try {
-            String[] parts = storedHash.split(":");
-            if (parts.length != 2) return false;
-
-            String saltBase64 = parts[0];
-            String expectedHash = parts[1];
-
-            byte[] saltBytes = Base64.getDecoder().decode(saltBase64);
-            String computedHash = hashWithSalt(rawPassword, saltBytes);
-
-            return expectedHash.equals(computedHash);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private static String hashWithSalt(String password, byte[] salt) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        md.update(salt);
-        byte[] hashedBytes = md.digest(password.getBytes());
-        return Base64.getEncoder().encodeToString(hashedBytes);
+        return ENCODER.matches(rawPassword, storedHash);
     }
 }
