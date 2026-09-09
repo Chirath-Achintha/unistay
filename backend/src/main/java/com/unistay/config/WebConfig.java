@@ -43,5 +43,10 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/");
+                
+        java.nio.file.Path uploadDir = java.nio.file.Paths.get("uploads");
+        String uploadPath = uploadDir.toFile().getAbsolutePath();
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:/" + uploadPath + "/");
     }
 }

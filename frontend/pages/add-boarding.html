@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Boarding – UniStay</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <style>
+        .section-title {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-dark);
+        }
+        .facilities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-alt); min-height: 100vh; display: flex; flex-direction: column;">
+
+    <!-- Navbar -->
+    <header class="navbar" id="top">
+        <div class="container">
+            <a href="../index.html" class="navbar-brand">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Uni<span>Stay</span>
+            </a>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">&#9776;</button>
+            <ul class="navbar-nav" id="main-nav">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <a href="login.html" class="btn btn-outline btn-sm" id="btn-login">Login</a>
+                <a href="register.html" class="btn btn-primary btn-sm" id="btn-register">Register</a>
+                <button class="btn btn-secondary btn-sm" id="btn-logout" style="display: none;" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <main class="container container-sm" style="flex: 1; padding: 4rem 1rem;">
+        <div class="card" style="padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Add New Boarding</h2>
+                <a href="owner-dashboard.html" class="btn btn-outline btn-sm">Back to Dashboard</a>
+            </div>
+            
+            <div id="alert-container"></div>
+            
+            <form id="boarding-form" onsubmit="handleSubmit(event)">
+                <!-- Basic Information -->
+                <h4 class="section-title">Basic Information</h4>
+                <div class="form-group">
+                    <label class="form-label">Boarding Name *</label>
+                    <input type="text" id="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="description" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address *</label>
+                    <input type="text" id="address" class="form-control" required>
+                </div>
+                <div class="grid grid-2" style="gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Location/Area *</label>
+                        <input type="text" id="location" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Google Maps Link</label>
+                        <input type="url" id="googleMapsLink" class="form-control">
+                    </div>
+                </div>
+
+                <!-- Price & Rooms -->
+                <h4 class="section-title">Price & Rooms</h4>
+                <div class="grid grid-2" style="gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Monthly Price ($) *</label>
+                        <input type="number" id="pricePerMonth" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Room Type *</label>
+                        <select id="roomType" class="form-select" required>
+                            <option value="">Select Room Type</option>
+                            <option value="Single Room">Single Room</option>
+                            <option value="Shared Room">Shared Room</option>
+                            <option value="Private Studio">Private Studio</option>
+                            <option value="Apartment">Apartment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Total Rooms *</label>
+                        <input type="number" id="totalRooms" class="form-control" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Available Rooms *</label>
+                        <input type="number" id="availableRooms" class="form-control" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Students Per Room *</label>
+                        <input type="number" id="studentsPerRoom" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Suitable Gender *</label>
+                        <select id="suitableGender" class="form-select" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male Only</option>
+                            <option value="Female">Female Only</option>
+                            <option value="Any">Any</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Facilities -->
+                <h4 class="section-title">Facilities</h4>
+                <div class="facilities-grid">
+                    <label class="checkbox-label"><input type="checkbox" id="hasBeds"> Beds Provided</label>
+                    <label class="checkbox-label"><input type="checkbox" id="hasHotWater"> Hot Water</label>
+                    <label class="checkbox-label"><input type="checkbox" id="hasKitchen"> Kitchen Access</label>
+                    <label class="checkbox-label"><input type="checkbox" id="hasLaundry"> Laundry</label>
+                    <label class="checkbox-label"><input type="checkbox" id="hasAc"> Air Conditioning</label>
+                    <label class="checkbox-label"><input type="checkbox" id="hasAttachedBathroom"> Attached Bathroom</label>
+                    <label class="checkbox-label"><input type="checkbox" id="hasCctv"> CCTV/Security</label>
+                    <label class="checkbox-label"><input type="checkbox" id="hasParking"> Parking</label>
+                    <label class="checkbox-label"><input type="checkbox" id="hasWifi"> Wi-Fi</label>
+                </div>
+
+                <!-- Other -->
+                <h4 class="section-title">Other Details</h4>
+                <div class="grid grid-2" style="gap: 1rem;">
+                    <div class="form-group">
+                        <label class="checkbox-label" style="margin-top: 30px;"><input type="checkbox" id="hasMainRoadAccess"> Main Road Access</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Distance from University (km)</label>
+                        <input type="number" id="distanceFromUniversity" class="form-control" step="0.1" min="0">
+                    </div>
+                </div>
+
+                <!-- Images -->
+                <h4 class="section-title">Pictures</h4>
+                <div class="form-group">
+                    <label class="form-label">Select Boarding Images (Multiple)</label>
+                    <input type="file" id="images" class="form-control" accept="image/*" multiple>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" id="btn-submit" class="btn btn-primary btn-full btn-lg">Add Boarding Listing</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = sessionStorage.getItem('unistay_user_role');
+            if (role !== 'OWNER') {
+                window.location.href = 'login.html'; 
+                return;
+            }
+            updateUserNav();
+        });
+
+        function updateUserNav() {
+            const userName = sessionStorage.getItem('unistay_user_name');
+            const role = sessionStorage.getItem('unistay_user_role');
+            
+            const btnLogin = document.getElementById('btn-login');
+            const btnRegister = document.getElementById('btn-register');
+            const btnLogout = document.getElementById('btn-logout');
+            const navbarActions = document.querySelector('.navbar-actions');
+
+            if (userName) {
+                btnLogin.href = '#';
+                btnLogin.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${userName}`;
+                
+                btnRegister.style.display = 'none';
+                btnLogout.style.display = 'inline-block';
+
+                if (role === 'OWNER' && !document.getElementById('nav-add-boarding')) {
+                    const addBoardingBtn = document.createElement('a');
+                    addBoardingBtn.href = 'add-boarding.html';
+                    addBoardingBtn.id = 'nav-add-boarding';
+                    addBoardingBtn.className = 'btn btn-primary btn-sm';
+                    addBoardingBtn.textContent = 'Add Boarding';
+                    navbarActions.insertBefore(addBoardingBtn, btnLogout);
+                }
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('unistay_user_name');
+            sessionStorage.removeItem('unistay_user_role');
+            sessionStorage.removeItem('unistay_user_id');
+            window.location.href = 'login.html';
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            const alertBox = document.getElementById('alert-container');
+            alertBox.innerHTML = '';
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const ownerId = sessionStorage.getItem('unistay_user_id');
+                
+                const formData = new FormData();
+                formData.append('ownerId', ownerId);
+                formData.append('name', document.getElementById('name').value);
+                formData.append('description', document.getElementById('description').value);
+                formData.append('address', document.getElementById('address').value);
+                formData.append('location', document.getElementById('location').value);
+                formData.append('googleMapsLink', document.getElementById('googleMapsLink').value);
+                formData.append('pricePerMonth', document.getElementById('pricePerMonth').value);
+                formData.append('totalRooms', document.getElementById('totalRooms').value);
+                formData.append('availableRooms', document.getElementById('availableRooms').value);
+                formData.append('roomType', document.getElementById('roomType').value);
+                formData.append('studentsPerRoom', document.getElementById('studentsPerRoom').value);
+                formData.append('suitableGender', document.getElementById('suitableGender').value);
+                formData.append('hasBeds', document.getElementById('hasBeds').checked);
+                formData.append('hasHotWater', document.getElementById('hasHotWater').checked);
+                formData.append('hasKitchen', document.getElementById('hasKitchen').checked);
+                formData.append('hasLaundry', document.getElementById('hasLaundry').checked);
+                formData.append('hasAc', document.getElementById('hasAc').checked);
+                formData.append('hasAttachedBathroom', document.getElementById('hasAttachedBathroom').checked);
+                formData.append('hasCctv', document.getElementById('hasCctv').checked);
+                formData.append('hasParking', document.getElementById('hasParking').checked);
+                formData.append('hasWifi', document.getElementById('hasWifi').checked);
+                formData.append('hasMainRoadAccess', document.getElementById('hasMainRoadAccess').checked);
+                if (document.getElementById('distanceFromUniversity').value) {
+                    formData.append('distanceFromUniversity', document.getElementById('distanceFromUniversity').value);
+                }
+
+                const fileInput = document.getElementById('images');
+                if (fileInput.files.length > 0) {
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        formData.append('images', fileInput.files[i]);
+                    }
+                }
+
+                const BASE = window.location.origin.includes(':8080') ? '' : 'http://localhost:8080';
+                
+                const response = await fetch(`${BASE}/api/boardings`, {
+                    method: 'POST',
+                    body: formData // Note: fetch automatically sets the correct multipart boundary header
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alertBox.innerHTML = '<div class="alert alert-success">Boarding added successfully! Redirecting...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'owner-dashboard.html';
+                    }, 1500);
+                } else {
+                    throw new Error(data.message || 'Failed to add boarding');
+                }
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
+                btn.disabled = false;
+                btn.textContent = 'Add Boarding Listing';
+            }
+        }
+    </script>
+</body>
+</html>

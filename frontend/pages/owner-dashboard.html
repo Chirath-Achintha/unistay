@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard – UniStay</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <style>
+        .boarding-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+        .boarding-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .b-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #e2e8f0;
+        }
+        .b-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .b-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+        .b-meta {
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            margin-bottom: 1rem;
+        }
+        .b-actions {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-alt); min-height: 100vh; display: flex; flex-direction: column;">
+
+    <!-- Navbar -->
+    <header class="navbar" id="top">
+        <div class="container">
+            <a href="../index.html" class="navbar-brand">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Uni<span>Stay</span>
+            </a>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">&#9776;</button>
+            <ul class="navbar-nav" id="main-nav">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <a href="login.html" class="btn btn-outline btn-sm" id="btn-login">Login</a>
+                <a href="register.html" class="btn btn-primary btn-sm" id="btn-register">Register</a>
+                <button class="btn btn-secondary btn-sm" id="btn-logout" style="display: none;" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="container" style="flex: 1; padding: 4rem 1rem;">
+        <div id="alert-container"></div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 id="welcome-message">Welcome</h1>
+                <p class="text-muted">Manage your student boarding properties</p>
+            </div>
+            <a href="add-boarding.html" class="btn btn-primary btn-lg">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Add Boarding
+            </a>
+        </div>
+
+        <!-- My Boardings Section -->
+        <section>
+            <h3 style="margin-bottom: 1.5rem;">My Boardings</h3>
+            
+            <div id="loading-indicator" style="text-align: center; padding: 2rem;">Loading your boardings...</div>
+            
+            <div id="empty-state" class="card" style="display: none; padding: 3rem; text-align: center; border: 1px dashed var(--border-color); background: transparent;">
+                <p class="text-muted" style="margin-bottom: 1rem;">You haven't added any boardings yet.</p>
+                <a href="add-boarding.html" class="btn btn-outline">Add Your First Boarding</a>
+            </div>
+
+            <div id="boardings-grid" class="grid grid-3" style="gap: 1.5rem; display: none;">
+                <!-- Boardings injected here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = sessionStorage.getItem('unistay_user_role');
+            if (role !== 'OWNER') {
+                window.location.href = 'login.html'; 
+                return;
+            }
+            
+            updateUserNav();
+            
+            const userName = sessionStorage.getItem('unistay_user_name');
+            if (userName) {
+                document.getElementById('welcome-message').textContent = `Welcome, ${userName}!`;
+            }
+            
+            loadBoardings();
+        });
+
+        function updateUserNav() {
+            const userName = sessionStorage.getItem('unistay_user_name');
+            const role = sessionStorage.getItem('unistay_user_role');
+            
+            const btnLogin = document.getElementById('btn-login');
+            const btnRegister = document.getElementById('btn-register');
+            const btnLogout = document.getElementById('btn-logout');
+            const navbarActions = document.querySelector('.navbar-actions');
+
+            if (userName) {
+                btnLogin.href = '#';
+                btnLogin.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${userName}`;
+                
+                btnRegister.style.display = 'none';
+                btnLogout.style.display = 'inline-block';
+
+                if (role === 'OWNER' && !document.getElementById('nav-add-boarding')) {
+                    const addBoardingBtn = document.createElement('a');
+                    addBoardingBtn.href = 'add-boarding.html';
+                    addBoardingBtn.id = 'nav-add-boarding';
+                    addBoardingBtn.className = 'btn btn-primary btn-sm';
+                    addBoardingBtn.textContent = 'Add Boarding';
+                    navbarActions.insertBefore(addBoardingBtn, btnLogout);
+                }
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('unistay_user_name');
+            sessionStorage.removeItem('unistay_user_role');
+            sessionStorage.removeItem('unistay_user_id');
+            window.location.href = 'login.html';
+        }
+
+        async function loadBoardings() {
+            const ownerId = sessionStorage.getItem('unistay_user_id');
+            const BASE = window.location.origin.includes(':8080') ? '' : 'http://localhost:8080';
+            
+            try {
+                const response = await fetch(`${BASE}/api/boardings/owner/${ownerId}`);
+                const data = await response.json();
+                
+                document.getElementById('loading-indicator').style.display = 'none';
+                
+                if (response.ok && data.data.length > 0) {
+                    const grid = document.getElementById('boardings-grid');
+                    grid.style.display = 'grid';
+                    grid.innerHTML = '';
+                    
+                    data.data.forEach(boarding => {
+                        let imageUrl = '../images/placeholder.jpg'; // Add a local fallback or just empty
+                        if (boarding.imageUrls && boarding.imageUrls.length > 0) {
+                            imageUrl = BASE + boarding.imageUrls[0];
+                        }
+
+                        const card = document.createElement('div');
+                        card.className = 'boarding-card';
+                        card.innerHTML = `
+                            <img src="${imageUrl}" alt="Boarding Image" class="b-image" onerror="this.src=''"/>
+                            <div class="b-content">
+                                <div class="b-title">${boarding.name}</div>
+                                <div class="b-meta">
+                                    📍 ${boarding.location}<br/>
+                                    💵 $${boarding.pricePerMonth} / month<br/>
+                                    🛏️ ${boarding.availableRooms} / ${boarding.totalRooms} Rooms Available
+                                </div>
+                                <div class="b-actions">
+                                    <button class="btn btn-outline btn-sm btn-full" onclick="alert('Edit functionality not fully implemented on frontend yet.')">Edit</button>
+                                    <button class="btn btn-secondary btn-sm btn-full" onclick="deleteBoarding(${boarding.id})">Delete</button>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                } else {
+                    document.getElementById('empty-state').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('loading-indicator').textContent = 'Failed to load boardings.';
+                console.error(err);
+            }
+        }
+
+        async function deleteBoarding(id) {
+            if (!confirm('Are you sure you want to delete this boarding?')) return;
+            
+            const ownerId = sessionStorage.getItem('unistay_user_id');
+            const BASE = window.location.origin.includes(':8080') ? '' : 'http://localhost:8080';
+            
+            try {
+                const response = await fetch(`${BASE}/api/boardings/${id}?ownerId=${ownerId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Boarding deleted successfully.');
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(`Failed to delete: ${data.message}`);
+                }
+            } catch (err) {
+                alert('An error occurred while deleting.');
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -234,10 +234,16 @@
                 const userData = await userRes.json();
 
                 if (userRes.ok) {
-                    // For a normal user, we save their info and redirect to homepage for now
+                    // For a normal user, we save their info and redirect based on role
+                    sessionStorage.setItem('unistay_user_id', userData.data.id);
                     sessionStorage.setItem('unistay_user_name', userData.data.fullName);
                     sessionStorage.setItem('unistay_user_role', userData.data.role);
-                    window.location.href = '../index.html';
+                    
+                    if (userData.data.role === 'OWNER') {
+                        window.location.href = './owner-dashboard.html';
+                    } else {
+                        window.location.href = '../index.html';
+                    }
                 } else {
                     alertBox.innerHTML = `<div class="alert alert-danger">❌ ${userData.message || 'Login failed.'}</div>`;
                 }
