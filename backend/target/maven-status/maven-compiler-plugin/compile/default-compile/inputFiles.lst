@@ -1,4 +1,5 @@
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\config\AdminAuthInterceptor.java
+D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\config\CloudinaryConfig.java
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\config\WebConfig.java
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\controller\AdminController.java
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\controller\AdminStudentController.java
@@ -24,6 +25,7 @@ D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\repository\packag
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\repository\UserRepository.java
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\service\AdminStudentService.java
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\service\BoardingService.java
+D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\service\CloudinaryService.java
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\service\package-info.java
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\service\UserService.java
 D:\projects\ISPM Web\unistay\backend\src\main\java\com\unistay\UnistayApplication.java

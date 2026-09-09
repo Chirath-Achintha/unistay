@@ -187,15 +187,23 @@
                     grid.innerHTML = '';
                     
                     data.data.forEach(boarding => {
-                        let imageUrl = '../images/placeholder.jpg'; // Add a local fallback or just empty
+                        let imageUrl = '';
                         if (boarding.imageUrls && boarding.imageUrls.length > 0) {
-                            imageUrl = BASE + boarding.imageUrls[0];
+                            const raw = boarding.imageUrls[0];
+                            // Cloudinary URLs are absolute (https://...) — use directly.
+                            // Local /uploads/ paths need the backend base prepended.
+                            imageUrl = raw.startsWith('http') ? raw : (BASE + raw);
                         }
 
                         const card = document.createElement('div');
                         card.className = 'boarding-card';
+
+                        const imageHtml = imageUrl
+                            ? `<img src="${imageUrl}" alt="${boarding.name}" class="b-image" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div class="b-image" style="display:none;align-items:center;justify-content:center;color:var(--text-muted);font-size:2rem;">🏠</div>`
+                            : `<div class="b-image" style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:2rem;background:#e2e8f0;">🏠</div>`;
+
                         card.innerHTML = `
-                            <img src="${imageUrl}" alt="Boarding Image" class="b-image" onerror="this.src=''"/>
+                            ${imageHtml}
                             <div class="b-content">
                                 <div class="b-title">${boarding.name}</div>
                                 <div class="b-meta">

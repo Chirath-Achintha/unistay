@@ -12,12 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,13 +20,15 @@ public class BoardingService {
 
     private final BoardingRepository boardingRepository;
     private final UserRepository userRepository;
-    
-    private final String UPLOAD_DIR = "uploads/boardings/";
+    private final CloudinaryService cloudinaryService;
 
     @Autowired
-    public BoardingService(BoardingRepository boardingRepository, UserRepository userRepository) {
+    public BoardingService(BoardingRepository boardingRepository,
+                           UserRepository userRepository,
+                           CloudinaryService cloudinaryService) {
         this.boardingRepository = boardingRepository;
         this.userRepository = userRepository;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Transactional
@@ -58,7 +55,7 @@ public class BoardingService {
                 .map(BoardingResponseDTO::new)
                 .collect(Collectors.toList());
     }
-    
+
     @Transactional(readOnly = true)
     public BoardingResponseDTO getBoardingById(Long id) {
         Boarding boarding = boardingRepository.findById(id)
@@ -78,8 +75,6 @@ public class BoardingService {
         boarding = mapToEntity(dto, boarding);
 
         if (images != null && images.length > 0) {
-            // Optional: for simplicity, we add new images instead of complex replace logic.
-            // In a robust system, you might delete old images or specify which to delete.
             handleImageUploads(boarding, images);
         }
 
@@ -111,7 +106,7 @@ public class BoardingService {
         boarding.setRoomType(dto.getRoomType());
         boarding.setStudentsPerRoom(dto.getStudentsPerRoom());
         boarding.setSuitableGender(dto.getSuitableGender());
-        
+
         boarding.setHasBeds(dto.getHasBeds());
         boarding.setHasHotWater(dto.getHasHotWater());
         boarding.setHasKitchen(dto.getHasKitchen());
@@ -126,26 +121,22 @@ public class BoardingService {
         return boarding;
     }
 
+    /**
+     * Uploads each image to Cloudinary and attaches the returned secure URL to the boarding.
+     */
     private void handleImageUploads(Boarding boarding, MultipartFile[] images) {
         if (images == null || images.length == 0) return;
 
-        try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+        boolean firstImage = boarding.getImages().isEmpty();
 
-            for (MultipartFile file : images) {
-                if (file.isEmpty()) continue;
-                String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\\\.\\\\-]", "_");
-                Path filePath = uploadPath.resolve(fileName);
-                Files.copy(file.getInputStream(), filePath);
+        for (MultipartFile file : images) {
+            if (file == null || file.isEmpty()) continue;
 
-                BoardingImage bImage = new BoardingImage("/uploads/boardings/" + fileName, false);
-                boarding.addImage(bImage);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store images", e);
+            String secureUrl = cloudinaryService.uploadImage(file);
+
+            BoardingImage bImage = new BoardingImage(secureUrl, firstImage);
+            boarding.addImage(bImage);
+            firstImage = false; // only the first image is primary
         }
     }
 }

@@ -26,7 +26,9 @@ com\unistay\config\AdminAuthInterceptor.class
 com\unistay\dto\StudentUpdateDTO.class
 com\unistay\UnistayApplication.class
 com\unistay\util\AdminTokenStore.class
+com\unistay\service\CloudinaryService.class
 com\unistay\dto\StudentRegistrationDTO.class
 com\unistay\service\package-info.class
+com\unistay\config\CloudinaryConfig.class
 com\unistay\util\PasswordUtil.class
 com\unistay\dto\UserResponseDTO.class
