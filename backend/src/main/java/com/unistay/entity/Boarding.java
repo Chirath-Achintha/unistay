@@ -35,6 +35,9 @@ public class Boarding {
     @Column(name = "google_maps_link")
     private String googleMapsLink;
 
+    @Column(name = "university")
+    private String university;
+
     @Column(name = "price_per_month", nullable = false)
     private Double pricePerMonth;
 
@@ -144,6 +147,14 @@ public class Boarding {
 
     public void setGoogleMapsLink(String googleMapsLink) {
         this.googleMapsLink = googleMapsLink;
+    }
+
+    public String getUniversity() {
+        return university;
+    }
+
+    public void setUniversity(String university) {
+        this.university = university;
     }
 
     public Double getPricePerMonth() {

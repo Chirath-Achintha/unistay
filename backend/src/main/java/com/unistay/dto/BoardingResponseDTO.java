@@ -15,6 +15,7 @@ public class BoardingResponseDTO {
     private String address;
     private String location;
     private String googleMapsLink;
+    private String university;
     private Double pricePerMonth;
     private Integer totalRooms;
     private Integer availableRooms;
@@ -45,6 +46,7 @@ public class BoardingResponseDTO {
         this.address = boarding.getAddress();
         this.location = boarding.getLocation();
         this.googleMapsLink = boarding.getGoogleMapsLink();
+        this.university = boarding.getUniversity();
         this.pricePerMonth = boarding.getPricePerMonth();
         this.totalRooms = boarding.getTotalRooms();
         this.availableRooms = boarding.getAvailableRooms();
@@ -81,6 +83,7 @@ public class BoardingResponseDTO {
     public String getAddress() { return address; }
     public String getLocation() { return location; }
     public String getGoogleMapsLink() { return googleMapsLink; }
+    public String getUniversity() { return university; }
     public Double getPricePerMonth() { return pricePerMonth; }
     public Integer getTotalRooms() { return totalRooms; }
     public Integer getAvailableRooms() { return availableRooms; }

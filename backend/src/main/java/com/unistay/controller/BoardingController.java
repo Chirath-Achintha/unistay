@@ -44,6 +44,20 @@ public class BoardingController {
         return ResponseEntity.ok(ApiResponseDTO.success("Boardings retrieved", boardings));
     }
     
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponseDTO<List<BoardingResponseDTO>>> searchBoardings(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String university,
+            @RequestParam(required = false) String roomType,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Double minDistance,
+            @RequestParam(required = false) Double maxDistance) {
+        List<BoardingResponseDTO> boardings = boardingService.searchBoardings(
+                city, university, roomType, minPrice, maxPrice, minDistance, maxDistance);
+        return ResponseEntity.ok(ApiResponseDTO.success("Boardings found", boardings));
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDTO<BoardingResponseDTO>> getBoardingById(@PathVariable Long id) {
         try {

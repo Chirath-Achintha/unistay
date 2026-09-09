@@ -24,6 +24,8 @@ public class BoardingRequestDTO {
 
     private String googleMapsLink;
 
+    private String university;
+
     @NotNull(message = "Price per month is required")
     @PositiveOrZero
     private Double pricePerMonth;
@@ -78,6 +80,9 @@ public class BoardingRequestDTO {
 
     public String getGoogleMapsLink() { return googleMapsLink; }
     public void setGoogleMapsLink(String googleMapsLink) { this.googleMapsLink = googleMapsLink; }
+
+    public String getUniversity() { return university; }
+    public void setUniversity(String university) { this.university = university; }
 
     public Double getPricePerMonth() { return pricePerMonth; }
     public void setPricePerMonth(Double pricePerMonth) { this.pricePerMonth = pricePerMonth; }

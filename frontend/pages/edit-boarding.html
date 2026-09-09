@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Boarding – UniStay</title>
+    <title>Edit Boarding – UniStay</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,13 +63,13 @@
     <main class="container container-sm" style="flex: 1; padding: 4rem 1rem;">
         <div class="card" style="padding: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2>Add New Boarding</h2>
+                <h2>Edit Boarding</h2>
                 <a href="owner-dashboard.html" class="btn btn-outline btn-sm">Back to Dashboard</a>
             </div>
             
             <div id="alert-container"></div>
             
-            <form id="boarding-form" onsubmit="handleSubmit(event)">
+            <form id="boarding-form" onsubmit="handleSubmit(event)" style="display: none;">
                 <!-- Basic Information -->
                 <h4 class="section-title">Basic Information</h4>
                 <div class="form-group">
@@ -173,20 +173,24 @@
                 <!-- Images -->
                 <h4 class="section-title">Pictures</h4>
                 <div class="form-group">
-                    <label class="form-label">Select Boarding Images (Multiple)</label>
+                    <label class="form-label">Add more images (Optional)</label>
                     <input type="file" id="images" class="form-control" accept="image/*" multiple>
+                    <small class="text-muted">Uploading new images will add them to the existing gallery.</small>
                 </div>
 
                 <div style="margin-top: 2rem;">
-                    <button type="submit" id="btn-submit" class="btn btn-primary btn-full btn-lg">Add Boarding Listing</button>
+                    <button type="submit" id="btn-submit" class="btn btn-primary btn-full btn-lg">Save Changes</button>
                 </div>
             </form>
+            <div id="loading" style="text-align: center; padding: 2rem;">Loading boarding details...</div>
         </div>
     </main>
 
     <!-- Scripts -->
     <script src="../js/common.js"></script>
     <script>
+        let boardingId = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             const role = sessionStorage.getItem('unistay_user_role');
             if (role !== 'OWNER') {
@@ -194,6 +198,16 @@
                 return;
             }
             updateUserNav();
+            
+            const params = new URLSearchParams(window.location.search);
+            boardingId = params.get('id');
+            
+            if (!boardingId) {
+                document.getElementById('loading').textContent = 'Invalid Boarding ID.';
+                return;
+            }
+            
+            loadBoardingDetails(boardingId);
         });
 
         function updateUserNav() {
@@ -228,6 +242,50 @@
             sessionStorage.removeItem('unistay_user_role');
             sessionStorage.removeItem('unistay_user_id');
             window.location.href = 'login.html';
+        }
+
+        async function loadBoardingDetails(id) {
+            const BASE = window.location.origin.includes(':8080') ? '' : 'http://localhost:8080';
+            
+            try {
+                const response = await fetch(`${BASE}/api/boardings/${id}`);
+                const data = await response.json();
+                
+                if (response.ok && data.data) {
+                    const b = data.data;
+                    document.getElementById('name').value = b.name || '';
+                    document.getElementById('description').value = b.description || '';
+                    document.getElementById('address').value = b.address || '';
+                    document.getElementById('location').value = b.location || '';
+                    document.getElementById('googleMapsLink').value = b.googleMapsLink || '';
+                    document.getElementById('university').value = b.university || '';
+                    document.getElementById('pricePerMonth').value = b.pricePerMonth || '';
+                    document.getElementById('totalRooms').value = b.totalRooms || '';
+                    document.getElementById('availableRooms').value = b.availableRooms || '';
+                    document.getElementById('roomType').value = b.roomType || '';
+                    document.getElementById('studentsPerRoom').value = b.studentsPerRoom || '';
+                    document.getElementById('suitableGender').value = b.suitableGender || '';
+                    document.getElementById('distanceFromUniversity').value = b.distanceFromUniversity || '';
+                    
+                    document.getElementById('hasBeds').checked = b.hasBeds || false;
+                    document.getElementById('hasHotWater').checked = b.hasHotWater || false;
+                    document.getElementById('hasKitchen').checked = b.hasKitchen || false;
+                    document.getElementById('hasLaundry').checked = b.hasLaundry || false;
+                    document.getElementById('hasAc').checked = b.hasAc || false;
+                    document.getElementById('hasAttachedBathroom').checked = b.hasAttachedBathroom || false;
+                    document.getElementById('hasCctv').checked = b.hasCctv || false;
+                    document.getElementById('hasParking').checked = b.hasParking || false;
+                    document.getElementById('hasWifi').checked = b.hasWifi || false;
+                    document.getElementById('hasMainRoadAccess').checked = b.hasMainRoadAccess || false;
+
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('boarding-form').style.display = 'block';
+                } else {
+                    document.getElementById('loading').textContent = data.message || 'Failed to load boarding details.';
+                }
+            } catch (err) {
+                document.getElementById('loading').textContent = 'An error occurred while loading details.';
+            }
         }
 
         async function handleSubmit(event) {
@@ -276,25 +334,25 @@
 
                 const BASE = window.location.origin.includes(':8080') ? '' : 'http://localhost:8080';
                 
-                const response = await fetch(`${BASE}/api/boardings`, {
-                    method: 'POST',
-                    body: formData // Note: fetch automatically sets the correct multipart boundary header
+                const response = await fetch(`${BASE}/api/boardings/${boardingId}`, {
+                    method: 'PUT',
+                    body: formData // fetch automatically sets multipart boundary header
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    alertBox.innerHTML = '<div class="alert alert-success">Boarding added successfully! Redirecting...</div>';
+                    alertBox.innerHTML = '<div class="alert alert-success">Boarding updated successfully! Redirecting...</div>';
                     setTimeout(() => {
                         window.location.href = 'owner-dashboard.html';
                     }, 1500);
                 } else {
-                    throw new Error(data.message || 'Failed to add boarding');
+                    throw new Error(data.message || 'Failed to update boarding');
                 }
             } catch (err) {
                 alertBox.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
                 btn.disabled = false;
-                btn.textContent = 'Add Boarding Listing';
+                btn.textContent = 'Save Changes';
             }
         }
     </script>

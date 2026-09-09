@@ -57,6 +57,28 @@ public class BoardingService {
     }
 
     @Transactional(readOnly = true)
+    public List<BoardingResponseDTO> searchBoardings(String city, String university, String roomType,
+                                                     Double minPrice, Double maxPrice,
+                                                     Double minDistance, Double maxDistance) {
+        if ("Any".equalsIgnoreCase(university) || "Any University".equalsIgnoreCase(university)) {
+            university = null;
+        }
+        if ("Any".equalsIgnoreCase(roomType) || "Any Room Type".equalsIgnoreCase(roomType)) {
+            roomType = null;
+        }
+        if (city != null && city.trim().isEmpty()) {
+            city = null;
+        } else if (city != null) {
+            city = city.trim();
+        }
+        
+        return boardingRepository.searchBoardings(city, university, roomType, minPrice, maxPrice, minDistance, maxDistance)
+                .stream()
+                .map(BoardingResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public BoardingResponseDTO getBoardingById(Long id) {
         Boarding boarding = boardingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Boarding not found"));
@@ -100,6 +122,7 @@ public class BoardingService {
         boarding.setAddress(dto.getAddress());
         boarding.setLocation(dto.getLocation());
         boarding.setGoogleMapsLink(dto.getGoogleMapsLink());
+        boarding.setUniversity(dto.getUniversity());
         boarding.setPricePerMonth(dto.getPricePerMonth());
         boarding.setTotalRooms(dto.getTotalRooms());
         boarding.setAvailableRooms(dto.getAvailableRooms());

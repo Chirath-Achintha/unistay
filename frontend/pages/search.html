@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Boardings – UniStay</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <style>
+        .search-container {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .filter-sidebar {
+            flex: 0 0 300px;
+            background: var(--bg-surface);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 100px;
+        }
+        .results-area {
+            flex: 1;
+        }
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: var(--font-size-sm);
+        }
+        .range-inputs {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .boarding-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+        .boarding-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .b-image-container {
+            width: 100%;
+            height: 200px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 2rem;
+            position: relative;
+        }
+        .b-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .b-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .b-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+        .b-meta {
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        .b-actions {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+            }
+            .filter-sidebar {
+                flex: none;
+                width: 100%;
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-alt); min-height: 100vh; display: flex; flex-direction: column;">
+
+    <!-- Navbar -->
+    <header class="navbar" id="top">
+        <div class="container">
+            <a href="../index.html" class="navbar-brand">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Uni<span>Stay</span>
+            </a>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">&#9776;</button>
+            <ul class="navbar-nav" id="main-nav">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="search.html" class="nav-link active">Find Boardings</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <a href="login.html" class="btn btn-outline btn-sm" id="btn-login">Login</a>
+                <a href="register.html" class="btn btn-primary btn-sm" id="btn-register">Register</a>
+                <button class="btn btn-secondary btn-sm" id="btn-logout" style="display: none;" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <main class="container" style="flex: 1; padding: 4rem 1rem;">
+        
+        <div style="margin-bottom: 2rem;">
+            <h1>Find Your Perfect Stay</h1>
+            <p class="text-muted">Search and filter available boarding houses near your university.</p>
+        </div>
+
+        <div class="search-container">
+            <!-- Filter Sidebar -->
+            <aside class="filter-sidebar">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">Filters</h3>
+                <form id="search-form" onsubmit="handleSearch(event)">
+                    
+                    <div class="filter-group">
+                        <label for="filter-city">City / Location</label>
+                        <input type="text" id="filter-city" class="form-control" placeholder="e.g. Malabe">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filter-university">University</label>
+                        <select id="filter-university" class="form-select">
+                            <option value="Any">Any University</option>
+                            <option value="SLIIT">SLIIT</option>
+                            <option value="CINEC">CINEC</option>
+                            <option value="Horizon">Horizon Campus</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filter-roomType">Room Type</label>
+                        <select id="filter-roomType" class="form-select">
+                            <option value="Any">Any Room Type</option>
+                            <option value="Single Room">Single Room</option>
+                            <option value="Shared Room">Shared Room</option>
+                            <option value="Private Studio">Private Studio</option>
+                            <option value="Apartment">Apartment</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Monthly Budget (Rs.)</label>
+                        <div class="range-inputs">
+                            <input type="number" id="filter-minPrice" class="form-control" placeholder="Min" min="0">
+                            <span>-</span>
+                            <input type="number" id="filter-maxPrice" class="form-control" placeholder="Max" min="0">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Distance to University (km)</label>
+                        <div class="range-inputs">
+                            <input type="number" id="filter-minDistance" class="form-control" placeholder="Min" step="0.1" min="0">
+                            <span>-</span>
+                            <input type="number" id="filter-maxDistance" class="form-control" placeholder="Max" step="0.1" min="0">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full" id="btn-search">Apply Filters</button>
+                    <button type="button" class="btn btn-outline btn-full" style="margin-top: 0.5rem;" onclick="resetFilters()">Reset</button>
+                </form>
+            </aside>
+
+            <!-- Results Area -->
+            <section class="results-area">
+                <div id="loading-indicator" style="text-align: center; padding: 3rem; color: var(--text-muted); display: none;">
+                    Searching...
+                </div>
+
+                <div id="empty-state" class="card" style="display: none; padding: 4rem 2rem; text-align: center; border: 1px dashed var(--border-color); background: transparent;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <h3 style="margin-bottom: 0.5rem;">No boarding houses found</h3>
+                    <p class="text-muted">Try adjusting your filters to see more results.</p>
+                </div>
+
+                <div id="boardings-grid" class="grid grid-2" style="gap: 1.5rem;">
+                    <!-- Results injected here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserNav();
+            // Initial search on load with no filters
+            performSearch();
+        });
+
+        function updateUserNav() {
+            const userName = sessionStorage.getItem('unistay_user_name');
+            const role = sessionStorage.getItem('unistay_user_role');
+            
+            const btnLogin = document.getElementById('btn-login');
+            const btnRegister = document.getElementById('btn-register');
+            const btnLogout = document.getElementById('btn-logout');
+            const navbarActions = document.querySelector('.navbar-actions');
+
+            if (userName) {
+                btnLogin.href = role === 'OWNER' ? 'owner-dashboard.html' : '#';
+                btnLogin.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${userName}`;
+                
+                btnRegister.style.display = 'none';
+                btnLogout.style.display = 'inline-block';
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('unistay_user_name');
+            sessionStorage.removeItem('unistay_user_role');
+            sessionStorage.removeItem('unistay_user_id');
+            window.location.reload();
+        }
+
+        function resetFilters() {
+            document.getElementById('search-form').reset();
+            performSearch();
+        }
+
+        function handleSearch(event) {
+            event.preventDefault();
+            performSearch();
+        }
+
+        async function performSearch() {
+            const grid = document.getElementById('boardings-grid');
+            const emptyState = document.getElementById('empty-state');
+            const loading = document.getElementById('loading-indicator');
+            const btnSearch = document.getElementById('btn-search');
+
+            grid.style.display = 'none';
+            emptyState.style.display = 'none';
+            loading.style.display = 'block';
+            btnSearch.disabled = true;
+
+            // Build query params
+            const params = new URLSearchParams();
+            
+            const city = document.getElementById('filter-city').value.trim();
+            if (city) params.append('city', city);
+            
+            const university = document.getElementById('filter-university').value;
+            if (university && university !== 'Any') params.append('university', university);
+            
+            const roomType = document.getElementById('filter-roomType').value;
+            if (roomType && roomType !== 'Any') params.append('roomType', roomType);
+            
+            const minPrice = document.getElementById('filter-minPrice').value;
+            if (minPrice) params.append('minPrice', minPrice);
+            
+            const maxPrice = document.getElementById('filter-maxPrice').value;
+            if (maxPrice) params.append('maxPrice', maxPrice);
+            
+            const minDistance = document.getElementById('filter-minDistance').value;
+            if (minDistance) params.append('minDistance', minDistance);
+            
+            const maxDistance = document.getElementById('filter-maxDistance').value;
+            if (maxDistance) params.append('maxDistance', maxDistance);
+
+            const BASE = window.location.origin.includes(':8080') ? '' : 'http://localhost:8080';
+            
+            try {
+                const response = await fetch(`${BASE}/api/boardings/search?${params.toString()}`);
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                btnSearch.disabled = false;
+                
+                if (response.ok && data.data && data.data.length > 0) {
+                    grid.style.display = 'grid';
+                    grid.innerHTML = '';
+                    
+                    data.data.forEach(boarding => {
+                        let imageUrl = '';
+                        if (boarding.imageUrls && boarding.imageUrls.length > 0) {
+                            const raw = boarding.imageUrls[0];
+                            imageUrl = raw.startsWith('http') ? raw : (BASE + raw);
+                        }
+
+                        const card = document.createElement('div');
+                        card.className = 'boarding-card';
+
+                        const imageHtml = imageUrl
+                            ? `<img src="${imageUrl}" alt="${boarding.name}" class="b-image" onerror="this.style.display='none';"/><div class="b-image-container">🏠</div>`
+                            : `<div class="b-image-container">🏠</div>`;
+
+                        let facilitiesHtml = [];
+                        if (boarding.hasWifi) facilitiesHtml.push('Wi-Fi');
+                        if (boarding.hasAc) facilitiesHtml.push('AC');
+                        if (boarding.hasAttachedBathroom) facilitiesHtml.push('Attached Bath');
+                        if (boarding.hasKitchen) facilitiesHtml.push('Kitchen');
+                        const facilitiesStr = facilitiesHtml.length > 0 ? facilitiesHtml.join(' • ') : 'Basic Facilities';
+
+                        card.innerHTML = `
+                            <div style="position: relative; height: 200px;">
+                                ${imageHtml}
+                            </div>
+                            <div class="b-content">
+                                <div class="b-title">${boarding.name}</div>
+                                <div class="b-meta">
+                                    📍 <strong>${boarding.location}</strong><br/>
+                                    🎓 Near ${boarding.university || 'University'} (${boarding.distanceFromUniversity || '?'} km)<br/>
+                                    💵 Rs. ${boarding.pricePerMonth} / month<br/>
+                                    🛏️ ${boarding.roomType} (${boarding.availableRooms} available)<br/>
+                                    ✨ ${facilitiesStr}
+                                </div>
+                                <div class="b-actions">
+                                    <button class="btn btn-primary btn-full" onclick="window.location.href='boarding-details.html?id=${boarding.id}'">View Details</button>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                } else {
+                    emptyState.style.display = 'block';
+                }
+            } catch (err) {
+                loading.style.display = 'none';
+                btnSearch.disabled = false;
+                emptyState.style.display = 'block';
+                emptyState.innerHTML = `<h3 style="margin-bottom: 0.5rem; color: var(--danger-color);">Error</h3><p class="text-muted">Failed to load search results. Please try again.</p>`;
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
