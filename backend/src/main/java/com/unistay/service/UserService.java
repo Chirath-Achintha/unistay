@@ -93,4 +93,14 @@ public class UserService {
         
         return new UserResponseDTO(user);
     }
+
+    /**
+     * Retrieves a user by their ID.
+     */
+    @Transactional(readOnly = true)
+    public UserResponseDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        return new UserResponseDTO(user);
+    }
 }

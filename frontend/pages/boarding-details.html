@@ -231,6 +231,18 @@
 
                     <button class="btn btn-primary btn-lg btn-full" onclick="alert('Booking functionality coming soon!')" id="btn-book">Contact Owner / Book Now</button>
                     <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">You won't be charged yet</p>
+
+                    <div id="visit-schedule-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: none;">
+                        <h4 style="margin-bottom: 1rem;">Schedule a Visit</h4>
+                        <form id="visit-form" onsubmit="handleVisitSubmit(event)">
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">Select Date</label>
+                                <input type="date" id="visit-date" class="form-control" required style="width: 100%; box-sizing: border-box;">
+                            </div>
+                            <button type="submit" class="btn btn-outline btn-full" id="btn-visit">Request Visit</button>
+                        </form>
+                        <div id="visit-message" style="margin-top: 1rem; font-size: 0.9rem; text-align: center;"></div>
+                    </div>
                 </aside>
 
             </div>
@@ -238,6 +250,7 @@
     </main>
 
     <!-- Scripts -->
+    <script src="../js/api.js"></script>
     <script src="../js/common.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -264,11 +277,23 @@
             const btnLogout = document.getElementById('btn-logout');
 
             if (userName) {
-                btnLogin.href = role === 'OWNER' ? 'owner-dashboard.html' : '#';
+                btnLogin.href = role === 'OWNER' ? 'owner-dashboard.html' : 'profile.html';
                 btnLogin.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${userName}`;
                 
                 btnRegister.style.display = 'none';
                 btnLogout.style.display = 'inline-block';
+                
+                if (role === 'STUDENT') {
+                    const visitSection = document.getElementById('visit-schedule-section');
+                    if (visitSection) visitSection.style.display = 'block';
+                    
+                    // Set min date to today
+                    const dateInput = document.getElementById('visit-date');
+                    if (dateInput) {
+                        const today = new Date().toISOString().split('T')[0];
+                        dateInput.min = today;
+                    }
+                }
             }
         }
 
@@ -397,6 +422,50 @@
                 facList.style.display = 'block';
             } else {
                 facList.innerHTML = facHtml;
+            }
+        }
+
+        async function handleVisitSubmit(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-visit');
+            const msg = document.getElementById('visit-message');
+            const dateStr = document.getElementById('visit-date').value;
+            
+            const params = new URLSearchParams(window.location.search);
+            const boardingId = params.get('id');
+            const studentId = sessionStorage.getItem('unistay_user_id');
+            
+            if (!studentId) {
+                msg.textContent = 'Please log in as a student to schedule a visit.';
+                msg.style.color = 'var(--danger-color)';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            msg.textContent = '';
+            
+            try {
+                const response = await API.post(`/visits/student/${studentId}`, {
+                    boardingId: boardingId,
+                    requestedDate: dateStr
+                });
+                
+                if (response.success) {
+                    msg.textContent = 'Visit request submitted successfully!';
+                    msg.style.color = 'var(--success-color)';
+                    document.getElementById('visit-form').reset();
+                } else {
+                    msg.textContent = response.message || 'Failed to submit request.';
+                    msg.style.color = 'var(--danger-color)';
+                }
+            } catch (err) {
+                msg.textContent = err.message || 'An error occurred.';
+                msg.style.color = 'var(--danger-color)';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Request Visit';
             }
         }
     </script>

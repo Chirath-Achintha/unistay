@@ -91,4 +91,20 @@ public class UserController {
                     .body(ApiResponseDTO.error(e.getMessage()));
         }
     }
+
+    /**
+     * GET /api/users/{id}
+     * Retrieves a user by their ID.
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> getUserById(@PathVariable Long id) {
+        try {
+            UserResponseDTO user = userService.getUserById(id);
+            return ResponseEntity.ok(ApiResponseDTO.success("User retrieved successfully", user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponseDTO.error(e.getMessage()));
+        }
+    }
 }
