@@ -379,6 +379,14 @@ textarea.form-control {
   color: var(--primary-dark);
 }
 
+.navbar-brand .brand-name {
+  color: var(--primary-dark);
+}
+
+.navbar-brand .brand-name span {
+  color: var(--secondary);
+}
+
 .navbar-brand span {
   color: var(--secondary);
 }
