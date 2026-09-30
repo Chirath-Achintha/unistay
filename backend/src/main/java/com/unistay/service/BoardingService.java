@@ -57,21 +57,40 @@ public class BoardingService {
     }
 
     @Transactional(readOnly = true)
+    public List<BoardingResponseDTO> getAllBoardings() {
+        return boardingRepository.findAll().stream()
+                .map(BoardingResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<BoardingResponseDTO> searchBoardings(String city, String university, String roomType,
                                                      Double minPrice, Double maxPrice,
                                                      Double minDistance, Double maxDistance) {
-        if ("Any".equalsIgnoreCase(university) || "Any University".equalsIgnoreCase(university)) {
+        if (university != null && (university.trim().isEmpty() || "Any".equalsIgnoreCase(university) || "Any University".equalsIgnoreCase(university))) {
             university = null;
+        } else if (university != null) {
+            university = university.trim();
         }
-        if ("Any".equalsIgnoreCase(roomType) || "Any Room Type".equalsIgnoreCase(roomType)) {
+
+        if (roomType != null && (roomType.trim().isEmpty() || "Any".equalsIgnoreCase(roomType) || "Any Room Type".equalsIgnoreCase(roomType))) {
             roomType = null;
+        } else if (roomType != null) {
+            roomType = roomType.trim();
         }
+
         if (city != null && city.trim().isEmpty()) {
             city = null;
         } else if (city != null) {
             city = city.trim();
         }
-        
+
+        // If no filter parameters are applied, return all available boardings
+        if (city == null && university == null && roomType == null &&
+            minPrice == null && maxPrice == null && minDistance == null && maxDistance == null) {
+            return getAllBoardings();
+        }
+
         return boardingRepository.searchBoardings(city, university, roomType, minPrice, maxPrice, minDistance, maxDistance)
                 .stream()
                 .map(BoardingResponseDTO::new)

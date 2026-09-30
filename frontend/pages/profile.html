@@ -14,7 +14,7 @@
     
     <style>
         .profile-container {
-            max-width: 600px;
+            max-width: 680px;
             margin: 4rem auto;
             background: var(--bg-surface);
             border: 1px solid var(--border-color);
@@ -29,10 +29,10 @@
             border-bottom: 1px solid var(--border-color);
         }
         .profile-avatar {
-            width: 100px;
-            height: 100px;
-            background: var(--primary-light);
-            color: var(--primary);
+            width: 96px;
+            height: 96px;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: #fff;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -40,6 +40,7 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin: 0 auto 1rem;
+            box-shadow: 0 4px 24px rgba(99,102,241,0.25);
         }
         .profile-name {
             font-size: 1.5rem;
@@ -47,22 +48,35 @@
             color: var(--text-main);
             margin-bottom: 0.25rem;
         }
-        .profile-role {
-            font-size: var(--font-size-sm);
-            color: var(--text-muted);
+        .profile-role-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            border-radius: 99px;
+            padding: 0.2rem 0.85rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            font-weight: 600;
+        }
+        .profile-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1.25rem;
         }
         .profile-details {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem 2rem;
+        }
+        @media (max-width: 480px) {
+            .profile-details { grid-template-columns: 1fr; }
         }
         .detail-item {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+            gap: 0.2rem;
         }
         .detail-label {
             font-size: var(--font-size-xs);
@@ -72,7 +86,7 @@
             letter-spacing: 0.05em;
         }
         .detail-value {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--text-main);
             font-weight: 500;
         }
@@ -81,9 +95,54 @@
             padding: 3rem;
             color: var(--text-muted);
         }
-        .error-state {
-            color: var(--danger-color);
+        .error-state { color: var(--danger-color); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
         }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            animation: modal-in 0.2s ease;
+        }
+        @keyframes modal-in {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+        .modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .alert-banner {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .alert-banner.success { background: #d1fae5; color: #065f46; }
+        .alert-banner.error   { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body style="background-color: var(--bg-alt); min-height: 100vh; display: flex; flex-direction: column;">
@@ -123,7 +182,11 @@
                 <div class="profile-header">
                     <div class="profile-avatar" id="avatar-initial">U</div>
                     <div class="profile-name" id="display-name">Loading...</div>
-                    <div class="profile-role">Student</div>
+                    <span class="profile-role-badge">Student</span>
+                    <div class="profile-actions">
+                        <button class="btn btn-primary btn-sm" onclick="openEditModal()">✏️ Edit Profile</button>
+                        <button class="btn btn-outline btn-sm" onclick="openPasswordModal()">🔒 Change Password</button>
+                    </div>
                 </div>
                 
                 <div class="profile-details">
@@ -162,10 +225,76 @@
         </div>
     </main>
 
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-box">
+            <div class="modal-title">✏️ Edit Profile</div>
+            <div id="edit-alert" class="alert-banner"></div>
+            <form id="edit-form" onsubmit="submitEditProfile(event)">
+                <div class="form-group">
+                    <label class="form-label" for="edit-fullName">Full Name</label>
+                    <input type="text" id="edit-fullName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-phone">Phone Number</label>
+                    <input type="text" id="edit-phone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-university">University</label>
+                    <select id="edit-university" class="form-select" required>
+                        <option value="SLIIT">SLIIT</option>
+                        <option value="CINEC">CINEC</option>
+                        <option value="Horizon">Horizon Campus</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-gender">Gender</label>
+                    <select id="edit-gender" class="form-select" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="edit-submit-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="password-modal">
+        <div class="modal-box">
+            <div class="modal-title">🔒 Change Password</div>
+            <div id="pw-alert" class="alert-banner"></div>
+            <form id="password-form" onsubmit="submitChangePassword(event)">
+                <div class="form-group">
+                    <label class="form-label" for="current-password">Current Password</label>
+                    <input type="password" id="current-password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="new-password">New Password</label>
+                    <input type="password" id="new-password" class="form-control" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closePasswordModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="pw-submit-btn">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="../js/api.js"></script>
     <script src="../js/common.js"></script>
     <script>
+        let currentUser = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             updateUserNav();
             loadProfileData();
@@ -182,11 +311,9 @@
             if (userName) {
                 btnLogin.href = role === 'OWNER' ? 'owner-dashboard.html' : 'profile.html';
                 btnLogin.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${userName}`;
-                
                 btnRegister.style.display = 'none';
                 btnLogout.style.display = 'inline-block';
             } else {
-                // Not logged in, redirect to login
                 window.location.href = 'login.html';
             }
         }
@@ -212,7 +339,6 @@
                 error.textContent = 'User ID not found. Please log in again.';
                 return;
             }
-            
             if (role !== 'STUDENT') {
                 loading.style.display = 'none';
                 error.style.display = 'block';
@@ -222,23 +348,12 @@
             
             try {
                 const response = await API.get(`/users/${userId}`);
-                
                 loading.style.display = 'none';
                 
                 if (response.success && response.data) {
-                    const user = response.data;
-                    
-                    document.getElementById('avatar-initial').textContent = user.fullName ? user.fullName.charAt(0).toUpperCase() : 'S';
-                    document.getElementById('display-name').textContent = user.fullName || 'Student';
-                    
-                    document.getElementById('val-name').textContent = user.fullName || 'N/A';
-                    document.getElementById('val-email').textContent = user.email || 'N/A';
-                    document.getElementById('val-phone').textContent = user.phone || 'N/A';
-                    document.getElementById('val-university').textContent = user.university || 'N/A';
-                    document.getElementById('val-gender').textContent = user.gender || 'N/A';
-                    
+                    currentUser = response.data;
+                    renderProfile(currentUser);
                     content.style.display = 'block';
-                    
                     loadVisits(userId);
                 } else {
                     error.style.display = 'block';
@@ -251,6 +366,132 @@
                 console.error('Profile fetch error:', err);
             }
         }
+
+        function renderProfile(user) {
+            document.getElementById('avatar-initial').textContent = user.fullName ? user.fullName.charAt(0).toUpperCase() : 'S';
+            document.getElementById('display-name').textContent = user.fullName || 'Student';
+            document.getElementById('val-name').textContent = user.fullName || 'N/A';
+            document.getElementById('val-email').textContent = user.email || 'N/A';
+            document.getElementById('val-phone').textContent = user.phone || 'N/A';
+            document.getElementById('val-university').textContent = user.university || 'N/A';
+            document.getElementById('val-gender').textContent = user.gender || 'N/A';
+        }
+
+        // ----- Edit Profile Modal -----
+        function openEditModal() {
+            if (!currentUser) return;
+            document.getElementById('edit-fullName').value = currentUser.fullName || '';
+            document.getElementById('edit-phone').value = currentUser.phone || '';
+            document.getElementById('edit-university').value = currentUser.university || 'SLIIT';
+            document.getElementById('edit-gender').value = currentUser.gender || 'Male';
+            showAlert('edit-alert', '', '');
+            document.getElementById('edit-modal').classList.add('open');
+        }
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('open');
+        }
+
+        async function submitEditProfile(e) {
+            e.preventDefault();
+            const userId = sessionStorage.getItem('unistay_user_id');
+            const btn = document.getElementById('edit-submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            const payload = {
+                fullName:   document.getElementById('edit-fullName').value.trim(),
+                phone:      document.getElementById('edit-phone').value.trim(),
+                university: document.getElementById('edit-university').value,
+                gender:     document.getElementById('edit-gender').value,
+            };
+
+            try {
+                const res = await API.put(`/users/${userId}/profile`, payload);
+                if (res.success) {
+                    currentUser = res.data;
+                    renderProfile(currentUser);
+                    // Update session name
+                    sessionStorage.setItem('unistay_user_name', currentUser.fullName);
+                    showAlert('edit-alert', 'success', '✅ Profile updated successfully!');
+                    setTimeout(() => closeEditModal(), 1200);
+                } else {
+                    showAlert('edit-alert', 'error', res.message || 'Failed to update profile.');
+                }
+            } catch (err) {
+                showAlert('edit-alert', 'error', 'Error connecting to server.');
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+            }
+        }
+
+        // ----- Change Password Modal -----
+        function openPasswordModal() {
+            document.getElementById('password-form').reset();
+            showAlert('pw-alert', '', '');
+            document.getElementById('password-modal').classList.add('open');
+        }
+        function closePasswordModal() {
+            document.getElementById('password-modal').classList.remove('open');
+        }
+
+        async function submitChangePassword(e) {
+            e.preventDefault();
+            const userId = sessionStorage.getItem('unistay_user_id');
+            const btn = document.getElementById('pw-submit-btn');
+
+            const current = document.getElementById('current-password').value;
+            const newPw   = document.getElementById('new-password').value;
+            const confirm = document.getElementById('confirm-password').value;
+
+            if (newPw !== confirm) {
+                showAlert('pw-alert', 'error', '❌ New passwords do not match.');
+                return;
+            }
+            if (newPw.length < 6) {
+                showAlert('pw-alert', 'error', '❌ New password must be at least 6 characters.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            try {
+                const res = await API.put(`/users/${userId}/change-password`, {
+                    currentPassword: current,
+                    newPassword: newPw,
+                });
+                if (res.success) {
+                    showAlert('pw-alert', 'success', '✅ Password changed successfully!');
+                    setTimeout(() => closePasswordModal(), 1400);
+                } else {
+                    showAlert('pw-alert', 'error', res.message || 'Failed to change password.');
+                }
+            } catch (err) {
+                showAlert('pw-alert', 'error', 'Error connecting to server.');
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Update Password';
+            }
+        }
+
+        function showAlert(id, type, msg) {
+            const el = document.getElementById(id);
+            el.className = `alert-banner ${type}`;
+            el.textContent = msg;
+            el.style.display = msg ? 'block' : 'none';
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('open');
+                }
+            });
+        });
 
         async function loadVisits(studentId) {
             const loading = document.getElementById('visits-loading');

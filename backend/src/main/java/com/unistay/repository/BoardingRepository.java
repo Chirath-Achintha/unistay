@@ -11,9 +11,9 @@ public interface BoardingRepository extends JpaRepository<Boarding, Long> {
     List<Boarding> findByOwnerId(Long ownerId);
 
     @org.springframework.data.jpa.repository.Query("SELECT b FROM Boarding b WHERE " +
-            "(:city IS NULL OR LOWER(b.location) LIKE LOWER(CONCAT('%', :city, '%'))) AND " +
-            "(:university IS NULL OR b.university = :university) AND " +
-            "(:roomType IS NULL OR b.roomType = :roomType) AND " +
+            "(:city IS NULL OR LOWER(b.location) LIKE LOWER(CONCAT('%', :city, '%')) OR LOWER(b.address) LIKE LOWER(CONCAT('%', :city, '%'))) AND " +
+            "(:university IS NULL OR LOWER(b.university) LIKE LOWER(CONCAT('%', :university, '%'))) AND " +
+            "(:roomType IS NULL OR LOWER(b.roomType) = LOWER(:roomType)) AND " +
             "(:minPrice IS NULL OR b.pricePerMonth >= :minPrice) AND " +
             "(:maxPrice IS NULL OR b.pricePerMonth <= :maxPrice) AND " +
             "(:minDistance IS NULL OR b.distanceFromUniversity >= :minDistance) AND " +

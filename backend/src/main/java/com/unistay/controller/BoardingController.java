@@ -27,7 +27,7 @@ public class BoardingController {
     @PostMapping
     public ResponseEntity<ApiResponseDTO<BoardingResponseDTO>> createBoarding(
             @ModelAttribute BoardingRequestDTO dto,
-            @RequestPart(value = "images", required = false) MultipartFile[] images) {
+            @RequestParam(value = "images", required = false) MultipartFile[] images) {
         try {
             BoardingResponseDTO created = boardingService.createBoarding(dto, images);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -36,6 +36,12 @@ public class BoardingController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponseDTO.error(e.getMessage()));
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponseDTO<List<BoardingResponseDTO>>> getAllBoardings() {
+        List<BoardingResponseDTO> boardings = boardingService.getAllBoardings();
+        return ResponseEntity.ok(ApiResponseDTO.success("All boardings retrieved", boardings));
     }
 
     @GetMapping("/owner/{ownerId}")
@@ -73,7 +79,7 @@ public class BoardingController {
     public ResponseEntity<ApiResponseDTO<BoardingResponseDTO>> updateBoarding(
             @PathVariable Long id,
             @ModelAttribute BoardingRequestDTO dto,
-            @RequestPart(value = "images", required = false) MultipartFile[] images) {
+            @RequestParam(value = "images", required = false) MultipartFile[] images) {
         try {
             BoardingResponseDTO updated = boardingService.updateBoarding(id, dto, images);
             return ResponseEntity.ok(ApiResponseDTO.success("Boarding updated successfully", updated));

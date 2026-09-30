@@ -91,7 +91,13 @@ async function handleStudentSubmit(event) {
         
         // Redirect to login page after a short delay
         setTimeout(() => {
-            window.location.href = 'login.html';
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirect = urlParams.get('redirect');
+            if (redirect) {
+                window.location.href = `login.html?redirect=${encodeURIComponent(redirect)}&msg=login_required`;
+            } else {
+                window.location.href = 'login.html';
+            }
         }, 1500);
         
     } catch (error) {
@@ -142,7 +148,13 @@ async function handleOwnerSubmit(event) {
 
         // Redirect to login page after a short delay
         setTimeout(() => {
-            window.location.href = 'login.html';
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirect = urlParams.get('redirect');
+            if (redirect) {
+                window.location.href = `login.html?redirect=${encodeURIComponent(redirect)}&msg=login_required`;
+            } else {
+                window.location.href = 'login.html';
+            }
         }, 1500);
 
     } catch (error) {

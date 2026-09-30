@@ -107,4 +107,49 @@ public class UserController {
                     .body(ApiResponseDTO.error(e.getMessage()));
         }
     }
+
+    /**
+     * PUT /api/users/{id}/profile
+     * Updates profile details (fullName, phone, university, gender, nic, address).
+     */
+    @PutMapping("/{id}/profile")
+    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> updateProfile(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> fields) {
+        try {
+            UserResponseDTO updated = userService.updateProfile(id, fields);
+            return ResponseEntity.ok(ApiResponseDTO.success("Profile updated successfully", updated));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponseDTO.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * PUT /api/users/{id}/change-password
+     * Changes the user's password (requires currentPassword + newPassword in body).
+     */
+    @PutMapping("/{id}/change-password")
+    public ResponseEntity<ApiResponseDTO<Void>> changePassword(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        String currentPassword = body.get("currentPassword");
+        String newPassword = body.get("newPassword");
+
+        if (currentPassword == null || newPassword == null) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponseDTO.error("currentPassword and newPassword are required."));
+        }
+
+        try {
+            userService.changePassword(id, currentPassword, newPassword);
+            return ResponseEntity.ok(ApiResponseDTO.success("Password changed successfully", null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponseDTO.error(e.getMessage()));
+        }
+    }
 }

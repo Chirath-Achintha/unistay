@@ -10,6 +10,7 @@ import com.unistay.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Map;
 
 /**
  * Service handling User Registration and management business logic.
@@ -102,5 +103,57 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
         return new UserResponseDTO(user);
+    }
+
+    /**
+     * Updates profile details for a user (fullName, phone, and role-specific fields).
+     */
+    @Transactional
+    public UserResponseDTO updateProfile(Long id, Map<String, String> fields) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+
+        if (fields.containsKey("fullName") && !fields.get("fullName").isBlank()) {
+            user.setFullName(fields.get("fullName").trim());
+        }
+        if (fields.containsKey("phone") && !fields.get("phone").isBlank()) {
+            user.setPhone(fields.get("phone").trim());
+        }
+        // Student-specific
+        if (fields.containsKey("university")) {
+            user.setUniversity(fields.get("university").trim());
+        }
+        if (fields.containsKey("gender")) {
+            user.setGender(fields.get("gender").trim());
+        }
+        // Owner-specific
+        if (fields.containsKey("nic")) {
+            user.setNic(fields.get("nic").trim());
+        }
+        if (fields.containsKey("address")) {
+            user.setAddress(fields.get("address").trim());
+        }
+
+        User saved = userRepository.save(user);
+        return new UserResponseDTO(saved);
+    }
+
+    /**
+     * Changes the password for a user after verifying the current password.
+     */
+    @Transactional
+    public void changePassword(Long id, String currentPassword, String newPassword) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+
+        if (!PasswordUtil.verifyPassword(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect.");
+        }
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("New password must be at least 6 characters.");
+        }
+
+        user.setPassword(PasswordUtil.hashPassword(newPassword));
+        userRepository.save(user);
     }
 }

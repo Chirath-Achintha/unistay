@@ -55,7 +55,67 @@
             padding-top: 1rem;
             border-top: 1px solid var(--border-color);
         }
-    </style>
+
+        /* Profile panel */
+        .owner-profile-bar {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .owner-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #6366f1, #0ea5e9);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .owner-info { flex: 1; }
+        .owner-name { font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+        .owner-email { font-size: 0.875rem; color: var(--text-muted); }
+        .owner-profile-actions { display: flex; gap: 0.75rem; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            animation: modal-in 0.2s ease;
+        }
+        @keyframes modal-in {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-main); }
+        .modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+        .alert-banner { padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.9rem; margin-bottom: 1rem; display: none; }
+        .alert-banner.success { background: #d1fae5; color: #065f46; }
+        .alert-banner.error   { background: #fee2e2; color: #991b1b; }
 </head>
 <body style="background-color: var(--bg-alt); min-height: 100vh; display: flex; flex-direction: column;">
 
@@ -86,6 +146,19 @@
     <!-- Dashboard Content -->
     <main class="container" style="flex: 1; padding: 4rem 1rem;">
         <div id="alert-container"></div>
+
+        <!-- Owner Profile Bar -->
+        <div class="owner-profile-bar" id="owner-profile-bar" style="display:none;">
+            <div class="owner-avatar" id="owner-avatar-initial">O</div>
+            <div class="owner-info">
+                <div class="owner-name" id="owner-display-name">Owner</div>
+                <div class="owner-email" id="owner-display-email"></div>
+            </div>
+            <div class="owner-profile-actions">
+                <button class="btn btn-primary btn-sm" onclick="openEditModal()">✏️ Edit Profile</button>
+                <button class="btn btn-outline btn-sm" onclick="openPasswordModal()">🔒 Change Password</button>
+            </div>
+        </div>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <div>
@@ -127,10 +200,68 @@
         </section>
     </main>
 
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-box">
+            <div class="modal-title">✏️ Edit Profile</div>
+            <div id="edit-alert" class="alert-banner"></div>
+            <form id="edit-form" onsubmit="submitEditProfile(event)">
+                <div class="form-group">
+                    <label class="form-label" for="edit-fullName">Full Name</label>
+                    <input type="text" id="edit-fullName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-phone">Phone Number</label>
+                    <input type="text" id="edit-phone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-nic">NIC Number</label>
+                    <input type="text" id="edit-nic" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-address">Address</label>
+                    <input type="text" id="edit-address" class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="edit-submit-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="password-modal">
+        <div class="modal-box">
+            <div class="modal-title">🔒 Change Password</div>
+            <div id="pw-alert" class="alert-banner"></div>
+            <form id="password-form" onsubmit="submitChangePassword(event)">
+                <div class="form-group">
+                    <label class="form-label" for="current-password">Current Password</label>
+                    <input type="password" id="current-password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="new-password">New Password</label>
+                    <input type="password" id="new-password" class="form-control" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closePasswordModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="pw-submit-btn">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="../js/api.js"></script>
     <script src="../js/common.js"></script>
     <script>
+        let currentOwner = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             const role = sessionStorage.getItem('unistay_user_role');
             if (role !== 'OWNER') {
@@ -139,6 +270,7 @@
             }
             
             updateUserNav();
+            loadOwnerProfile();
             
             const userName = sessionStorage.getItem('unistay_user_name');
             if (userName) {
@@ -147,6 +279,13 @@
             
             loadBoardings();
             loadVisitRequests();
+
+            // Close modals on overlay click
+            document.querySelectorAll('.modal-overlay').forEach(o => {
+                o.addEventListener('click', function(e) {
+                    if (e.target === this) this.classList.remove('open');
+                });
+            });
         });
 
         function updateUserNav() {
@@ -181,6 +320,113 @@
             sessionStorage.removeItem('unistay_user_role');
             sessionStorage.removeItem('unistay_user_id');
             window.location.href = 'login.html';
+        }
+
+        async function loadOwnerProfile() {
+            const userId = sessionStorage.getItem('unistay_user_id');
+            try {
+                const res = await API.get(`/users/${userId}`);
+                if (res.success && res.data) {
+                    currentOwner = res.data;
+                    const bar = document.getElementById('owner-profile-bar');
+                    document.getElementById('owner-avatar-initial').textContent = (currentOwner.fullName || 'O').charAt(0).toUpperCase();
+                    document.getElementById('owner-display-name').textContent = currentOwner.fullName || 'Owner';
+                    document.getElementById('owner-display-email').textContent = currentOwner.email || '';
+                    bar.style.display = 'flex';
+                }
+            } catch (err) {
+                console.error('Failed to load owner profile:', err);
+            }
+        }
+
+        // ----- Edit Profile Modal -----
+        function openEditModal() {
+            if (!currentOwner) return;
+            document.getElementById('edit-fullName').value = currentOwner.fullName || '';
+            document.getElementById('edit-phone').value = currentOwner.phone || '';
+            document.getElementById('edit-nic').value = currentOwner.nic || '';
+            document.getElementById('edit-address').value = currentOwner.address || '';
+            showAlert('edit-alert', '', '');
+            document.getElementById('edit-modal').classList.add('open');
+        }
+        function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
+
+        async function submitEditProfile(e) {
+            e.preventDefault();
+            const userId = sessionStorage.getItem('unistay_user_id');
+            const btn = document.getElementById('edit-submit-btn');
+            btn.disabled = true; btn.textContent = 'Saving...';
+
+            const payload = {
+                fullName: document.getElementById('edit-fullName').value.trim(),
+                phone:    document.getElementById('edit-phone').value.trim(),
+                nic:      document.getElementById('edit-nic').value.trim(),
+                address:  document.getElementById('edit-address').value.trim(),
+            };
+
+            try {
+                const res = await API.put(`/users/${userId}/profile`, payload);
+                if (res.success) {
+                    currentOwner = res.data;
+                    sessionStorage.setItem('unistay_user_name', currentOwner.fullName);
+                    document.getElementById('welcome-message').textContent = `Welcome, ${currentOwner.fullName}!`;
+                    document.getElementById('owner-display-name').textContent = currentOwner.fullName;
+                    document.getElementById('owner-avatar-initial').textContent = (currentOwner.fullName || 'O').charAt(0).toUpperCase();
+                    showAlert('edit-alert', 'success', '✅ Profile updated successfully!');
+                    setTimeout(() => closeEditModal(), 1200);
+                } else {
+                    showAlert('edit-alert', 'error', res.message || 'Failed to update profile.');
+                }
+            } catch (err) {
+                showAlert('edit-alert', 'error', 'Error connecting to server.');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Save Changes';
+            }
+        }
+
+        // ----- Change Password Modal -----
+        function openPasswordModal() {
+            document.getElementById('password-form').reset();
+            showAlert('pw-alert', '', '');
+            document.getElementById('password-modal').classList.add('open');
+        }
+        function closePasswordModal() { document.getElementById('password-modal').classList.remove('open'); }
+
+        async function submitChangePassword(e) {
+            e.preventDefault();
+            const userId = sessionStorage.getItem('unistay_user_id');
+            const btn = document.getElementById('pw-submit-btn');
+            const current = document.getElementById('current-password').value;
+            const newPw   = document.getElementById('new-password').value;
+            const confirm = document.getElementById('confirm-password').value;
+
+            if (newPw !== confirm) { showAlert('pw-alert', 'error', '❌ New passwords do not match.'); return; }
+            if (newPw.length < 6)  { showAlert('pw-alert', 'error', '❌ New password must be at least 6 characters.'); return; }
+
+            btn.disabled = true; btn.textContent = 'Updating...';
+            try {
+                const res = await API.put(`/users/${userId}/change-password`, {
+                    currentPassword: current,
+                    newPassword: newPw,
+                });
+                if (res.success) {
+                    showAlert('pw-alert', 'success', '✅ Password changed successfully!');
+                    setTimeout(() => closePasswordModal(), 1400);
+                } else {
+                    showAlert('pw-alert', 'error', res.message || 'Failed to change password.');
+                }
+            } catch (err) {
+                showAlert('pw-alert', 'error', 'Error connecting to server.');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Update Password';
+            }
+        }
+
+        function showAlert(id, type, msg) {
+            const el = document.getElementById(id);
+            el.className = `alert-banner ${type}`;
+            el.textContent = msg;
+            el.style.display = msg ? 'block' : 'none';
         }
 
         async function loadBoardings() {

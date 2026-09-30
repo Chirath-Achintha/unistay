@@ -32,7 +32,7 @@ public class ReviewService {
     }
 
     @Transactional
-    public ReviewResponseDTO addOrUpdateReview(Long studentId, Long boardingId, ReviewRequestDTO request) {
+    public ReviewResponseDTO createReview(Long studentId, Long boardingId, ReviewRequestDTO request) {
         if (request.getRating() == null || request.getRating() < 1 || request.getRating() > 5) {
             throw new IllegalArgumentException("Rating must be between 1 and 5.");
         }
@@ -42,23 +42,34 @@ public class ReviewService {
         Boarding boarding = boardingRepository.findById(boardingId)
                 .orElseThrow(() -> new IllegalArgumentException("Boarding house not found."));
 
-        Optional<Review> existingReviewOpt = reviewRepository.findByBoardingIdAndStudentId(boardingId, studentId);
-
-        Review review;
-        if (existingReviewOpt.isPresent()) {
-            review = existingReviewOpt.get();
-            review.setRating(request.getRating());
-            review.setComment(request.getComment());
-        } else {
-            review = new Review();
-            review.setStudent(student);
-            review.setBoarding(boarding);
-            review.setRating(request.getRating());
-            review.setComment(request.getComment());
-        }
+        Review review = new Review();
+        review.setStudent(student);
+        review.setBoarding(boarding);
+        review.setRating(request.getRating());
+        review.setComment(request.getComment());
 
         Review savedReview = reviewRepository.save(review);
         return new ReviewResponseDTO(savedReview);
+    }
+
+    @Transactional
+    public ReviewResponseDTO updateReview(Long studentId, Long reviewId, ReviewRequestDTO request) {
+        if (request.getRating() == null || request.getRating() < 1 || request.getRating() > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5.");
+        }
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found."));
+
+        if (!review.getStudent().getId().equals(studentId)) {
+            throw new IllegalArgumentException("You can only update your own reviews.");
+        }
+
+        review.setRating(request.getRating());
+        review.setComment(request.getComment());
+
+        Review updatedReview = reviewRepository.save(review);
+        return new ReviewResponseDTO(updatedReview);
     }
 
     @Transactional(readOnly = true)

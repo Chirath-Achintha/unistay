@@ -28,14 +28,28 @@ public class ReviewController {
     }
 
     @PostMapping("/boarding/{boardingId}/student/{studentId}")
-    public ResponseEntity<ApiResponseDTO<ReviewResponseDTO>> addOrUpdateReview(
+    public ResponseEntity<ApiResponseDTO<ReviewResponseDTO>> createReview(
             @PathVariable Long boardingId,
             @PathVariable Long studentId,
             @RequestBody ReviewRequestDTO requestDTO) {
         try {
-            ReviewResponseDTO response = reviewService.addOrUpdateReview(studentId, boardingId, requestDTO);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponseDTO.success("Review saved successfully", response));
+            ReviewResponseDTO response = reviewService.createReview(studentId, boardingId, requestDTO);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponseDTO.success("Review posted successfully", response));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponseDTO.error(e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{reviewId}/student/{studentId}")
+    public ResponseEntity<ApiResponseDTO<ReviewResponseDTO>> updateReview(
+            @PathVariable Long reviewId,
+            @PathVariable Long studentId,
+            @RequestBody ReviewRequestDTO requestDTO) {
+        try {
+            ReviewResponseDTO response = reviewService.updateReview(studentId, reviewId, requestDTO);
+            return ResponseEntity.ok(ApiResponseDTO.success("Review updated successfully", response));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponseDTO.error(e.getMessage()));

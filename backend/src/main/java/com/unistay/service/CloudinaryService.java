@@ -40,18 +40,45 @@ public class CloudinaryService {
         validateImage(file);
 
         try {
-            Map<String, Object> uploadResult = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    ObjectUtils.asMap(
-                            "folder", "unistay/boardings",
-                            "resource_type", "image",
-                            "use_filename", false,
-                            "unique_filename", true
-                    )
-            );
-            return (String) uploadResult.get("secure_url");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload image to Cloudinary: " + e.getMessage(), e);
+            if (cloudinary != null && cloudinary.config != null && cloudinary.config.cloudName != null && !cloudinary.config.cloudName.isEmpty()) {
+                Map<String, Object> uploadResult = cloudinary.uploader().upload(
+                        file.getBytes(),
+                        ObjectUtils.asMap(
+                                "folder", "unistay/boardings",
+                                "resource_type", "image",
+                                "use_filename", false,
+                                "unique_filename", true
+                        )
+                );
+                String url = (String) uploadResult.get("secure_url");
+                if (url != null && !url.isEmpty()) {
+                    return url;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Cloudinary upload failed, falling back to local file storage: " + e.getMessage());
+        }
+
+        return saveLocally(file);
+    }
+
+    private String saveLocally(MultipartFile file) {
+        try {
+            java.nio.file.Path uploadPath = java.nio.file.Paths.get("uploads");
+            if (!java.nio.file.Files.exists(uploadPath)) {
+                java.nio.file.Files.createDirectories(uploadPath);
+            }
+            String ext = ".jpg";
+            String originalName = file.getOriginalFilename();
+            if (originalName != null && originalName.contains(".")) {
+                ext = originalName.substring(originalName.lastIndexOf("."));
+            }
+            String filename = java.util.UUID.randomUUID().toString() + ext;
+            java.nio.file.Path filePath = uploadPath.resolve(filename);
+            java.nio.file.Files.copy(file.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            return "/uploads/" + filename;
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to save image locally: " + e.getMessage(), e);
         }
     }
 
