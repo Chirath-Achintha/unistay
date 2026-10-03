@@ -116,6 +116,7 @@
         .alert-banner { padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.9rem; margin-bottom: 1rem; display: none; }
         .alert-banner.success { background: #d1fae5; color: #065f46; }
         .alert-banner.error   { background: #fee2e2; color: #991b1b; }
+    </style>
 </head>
 <body style="background-color: var(--bg-alt); min-height: 100vh; display: flex; flex-direction: column;">
 
@@ -145,10 +146,14 @@
 
     <!-- Dashboard Content -->
     <main class="container" style="flex: 1; padding: 4rem 1rem;">
-        <div id="alert-container"></div>
 
-        <!-- Shows the owner details and quick actions at the top of the dashboard. -->
-        <div class="owner-profile-bar" id="owner-profile-bar" style="display:none;">
+        <!-- Backend offline warning banner -->
+        <div id="backend-error-banner" style="display:none; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; border-radius:var(--radius-md); padding:1rem 1.25rem; margin-bottom:1.5rem; font-weight:500;">
+            ⚠️ Cannot reach the backend server. Make sure the backend is running on <strong>http://localhost:8080</strong> and refresh this page.
+        </div>
+
+        <!-- Profile bar — shown immediately from sessionStorage, updated when API responds -->
+        <div class="owner-profile-bar" id="owner-profile-bar">
             <div class="owner-avatar" id="owner-avatar-initial">O</div>
             <div class="owner-info">
                 <div class="owner-name" id="owner-display-name">Owner</div>
@@ -177,7 +182,7 @@
         <section>
             <h3 style="margin-bottom: 1.5rem;">My Boardings</h3>
             
-            <div id="loading-indicator" style="text-align: center; padding: 2rem;">Loading your boardings...</div>
+            <div id="loading-indicator" style="text-align: center; padding: 2rem; color: var(--text-muted);">⏳ Loading your boardings...</div>
             
             <div id="empty-state" class="card" style="display: none; padding: 3rem; text-align: center; border: 1px dashed var(--border-color); background: transparent;">
                 <p class="text-muted" style="margin-bottom: 1rem;">You haven't added any boardings yet.</p>
@@ -192,7 +197,7 @@
         <!-- Visit Requests Section -->
         <section style="margin-top: 4rem;">
             <h3 style="margin-bottom: 1.5rem;">Visit Requests</h3>
-            <div id="visits-loading" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading visit requests...</div>
+            <div id="visits-loading" style="text-align: center; padding: 2rem; color: var(--text-muted);">⏳ Loading visit requests...</div>
             <div id="visits-empty" style="display: none; padding: 2rem; text-align: center; color: var(--text-muted);">No visit requests yet for your boarding houses.</div>
             <div id="visits-list" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <!-- Visit cards injected here -->
@@ -269,15 +274,17 @@
                 window.location.href = 'login.html'; 
                 return;
             }
-            
+
+            // ── Show content immediately from sessionStorage (no blank page) ──
+            const userName = sessionStorage.getItem('unistay_user_name') || 'Owner';
+            const userEmail = sessionStorage.getItem('unistay_user_email') || '';
+            document.getElementById('welcome-message').textContent = `Welcome, ${userName}!`;
+            document.getElementById('owner-display-name').textContent = userName;
+            document.getElementById('owner-avatar-initial').textContent = userName.charAt(0).toUpperCase();
+            if (userEmail) document.getElementById('owner-display-email').textContent = userEmail;
+
             updateUserNav();
             loadOwnerProfile();
-            
-            const userName = sessionStorage.getItem('unistay_user_name');
-            if (userName) {
-                document.getElementById('welcome-message').textContent = `Welcome, ${userName}!`;
-            }
-            
             loadBoardings();
             loadVisitRequests();
 
@@ -440,7 +447,7 @@
                 
                 document.getElementById('loading-indicator').style.display = 'none';
                 
-                if (response.ok && data.data.length > 0) {
+                if (response.ok && data.data && data.data.length > 0) {
                     const grid = document.getElementById('boardings-grid');
                     grid.style.display = 'grid';
                     grid.innerHTML = '';
@@ -482,8 +489,10 @@
                     document.getElementById('empty-state').style.display = 'block';
                 }
             } catch (err) {
-                document.getElementById('loading-indicator').textContent = 'Failed to load boardings.';
-                console.error(err);
+                document.getElementById('loading-indicator').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'block';
+                document.getElementById('backend-error-banner').style.display = 'block';
+                console.error('loadBoardings error:', err);
             }
         }
 
@@ -528,8 +537,10 @@
                     emptyEl.style.display = 'block';
                 }
             } catch (err) {
-                loadingEl.textContent = 'Failed to load visit requests.';
-                console.error(err);
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'block';
+                emptyEl.textContent = '⚠️ Could not load visit requests — backend may be offline.';
+                console.error('loadVisitRequests error:', err);
             }
         }
 

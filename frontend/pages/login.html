@@ -258,6 +258,7 @@
                     sessionStorage.setItem('unistay_user_id', userData.data.id);
                     sessionStorage.setItem('unistay_user_name', userData.data.fullName);
                     sessionStorage.setItem('unistay_user_role', userData.data.role);
+                    sessionStorage.setItem('unistay_user_email', userData.data.email);
 
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirect = urlParams.get('redirect');
