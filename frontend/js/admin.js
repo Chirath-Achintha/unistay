@@ -19,6 +19,7 @@ const ADMIN_EMAIL_KEY = 'unistay_admin_email';
  * Reads the stored admin token.
  * Returns null if no token is stored.
  */
+// Reads the admin session token from the browser so protected admin pages can stay secure.
 function getAdminToken() {
     return sessionStorage.getItem(ADMIN_TOKEN_KEY);
 }
@@ -34,6 +35,7 @@ function getAdminEmail() {
  * Redirects to admin login if no session token is present.
  * Call this at the top of every protected admin page.
  */
+// Stops non-admin users from opening protected admin pages without a valid session.
 function checkAdminAuth() {
     if (!getAdminToken()) {
         window.location.href = './login.html';
@@ -60,6 +62,7 @@ function clearAdminSession() {
 /**
  * Logs the admin out: calls the logout API, clears session, redirects to login.
  */
+// Ends the admin session safely and sends the user back to the login screen.
 async function logout() {
     try {
         await adminAPI.post('/api/admin/logout');

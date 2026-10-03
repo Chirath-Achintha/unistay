@@ -31,6 +31,7 @@ public class ReviewService {
         this.boardingRepository = boardingRepository;
     }
 
+    // Saves a student review after checking the rating is valid and the student is real.
     @Transactional
     public ReviewResponseDTO createReview(Long studentId, Long boardingId, ReviewRequestDTO request) {
         if (request.getRating() == null || request.getRating() < 1 || request.getRating() > 5) {
@@ -72,6 +73,7 @@ public class ReviewService {
         return new ReviewResponseDTO(updatedReview);
     }
 
+    // Collects reviews for one boarding place and calculates the average star rating.
     @Transactional(readOnly = true)
     public BoardingReviewsDTO getBoardingReviews(Long boardingId) {
         List<Review> reviews = reviewRepository.findByBoardingIdOrderByCreatedAtDesc(boardingId);

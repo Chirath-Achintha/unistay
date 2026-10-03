@@ -31,6 +31,7 @@ public class BoardingService {
         this.cloudinaryService = cloudinaryService;
     }
 
+    // Saves a boarding place after checking that the owner is valid and uploading images.
     @Transactional
     public BoardingResponseDTO createBoarding(BoardingRequestDTO dto, MultipartFile[] images) {
         User owner = userRepository.findById(dto.getOwnerId())
@@ -63,6 +64,7 @@ public class BoardingService {
                 .collect(Collectors.toList());
     }
 
+    // Filters the list of boardings according to the student's chosen city, budget, and room needs.
     @Transactional(readOnly = true)
     public List<BoardingResponseDTO> searchBoardings(String city, String university, String roomType,
                                                      Double minPrice, Double maxPrice,
@@ -123,6 +125,7 @@ public class BoardingService {
         return new BoardingResponseDTO(updatedBoarding);
     }
 
+    // Removes a boarding listing only when the owner is allowed to delete it.
     @Transactional
     public void deleteBoarding(Long id, Long ownerId) {
         Boarding boarding = boardingRepository.findById(id)

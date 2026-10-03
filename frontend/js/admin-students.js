@@ -16,6 +16,7 @@ function showAlert(message, type = 'success') {
 // Load & Search Students
 // -------------------------------------------------------
 
+// Loads the student list from the admin API and shows it in the table.
 async function loadStudents(searchTerm = '') {
     const tbody = document.getElementById('students-tbody');
     tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading students...</td></tr>';
@@ -60,6 +61,7 @@ function handleSearch(event) {
 // Modals (View / Edit)
 // -------------------------------------------------------
 
+// Opens a modal window so the admin can view or edit a student record.
 function openModal(id) {
     document.getElementById(id).classList.add('active');
 }

@@ -32,6 +32,7 @@ public class UserController {
      * POST /api/users/register/student
      * Registers a new Student user.
      */
+    // Creates a new student account for first-time sign-up.
     @PostMapping("/register/student")
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> registerStudent(
             @Valid @RequestBody StudentRegistrationDTO studentDto) {
@@ -70,6 +71,7 @@ public class UserController {
      * POST /api/users/login
      * Authenticates a user (Student or Owner).
      */
+    // Checks the email and password and lets a user sign in.
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> login(
             @RequestBody Map<String, String> credentials) {
@@ -112,6 +114,7 @@ public class UserController {
      * PUT /api/users/{id}/profile
      * Updates profile details (fullName, phone, university, gender, nic, address).
      */
+    // Updates the logged-in person's basic profile information.
     @PutMapping("/{id}/profile")
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> updateProfile(
             @PathVariable Long id,

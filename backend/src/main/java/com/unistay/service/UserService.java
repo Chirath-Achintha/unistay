@@ -28,6 +28,7 @@ public class UserService {
     /**
      * Registers a new Student user account.
      */
+    // Creates a student account after checking that the email is not already used.
     @Transactional
     public UserResponseDTO registerStudent(StudentRegistrationDTO dto) {
         if (userRepository.existsByEmail(dto.getEmail().toLowerCase().trim())) {
@@ -83,6 +84,7 @@ public class UserService {
     /**
      * Authenticates a user by email and password.
      */
+    // Checks the entered password against the saved hash before allowing login.
     @Transactional(readOnly = true)
     public UserResponseDTO login(String email, String rawPassword) {
         User user = userRepository.findByEmail(email.toLowerCase().trim())
@@ -108,6 +110,7 @@ public class UserService {
     /**
      * Updates profile details for a user (fullName, phone, and role-specific fields).
      */
+    // Saves the edited personal details of a user after they update their profile.
     @Transactional
     public UserResponseDTO updateProfile(Long id, Map<String, String> fields) {
         User user = userRepository.findById(id)

@@ -178,6 +178,7 @@
             <div id="loading" class="loading-state">Loading profile details...</div>
             <div id="error" class="error-state" style="display: none;"></div>
             
+            <!-- Personal profile page for the logged-in student. -->
             <div id="profile-content" style="display: none;">
                 <div class="profile-header">
                     <div class="profile-avatar" id="avatar-initial">U</div>
@@ -295,6 +296,7 @@
     <script>
         let currentUser = null;
 
+        // Loads the current student's profile and visit requests when the page opens.
         document.addEventListener('DOMContentLoaded', () => {
             updateUserNav();
             loadProfileData();
@@ -325,6 +327,7 @@
             window.location.href = '../index.html';
         }
 
+        // Gets the logged-in student's details from the backend so the profile is shown correctly.
         async function loadProfileData() {
             const userId = sessionStorage.getItem('unistay_user_id');
             const role = sessionStorage.getItem('unistay_user_role');

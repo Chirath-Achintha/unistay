@@ -29,6 +29,7 @@ public class AdminStudentService {
     /**
      * Returns all students, or students matching a search term if provided.
      */
+    // Shows the admin list of student accounts and supports quick search.
     @Transactional(readOnly = true)
     public List<UserResponseDTO> getStudents(String search) {
         List<User> students;
@@ -54,6 +55,7 @@ public class AdminStudentService {
     /**
      * Updates editable student fields and saves to the database.
      */
+    // Updates the details of a selected student from the admin panel.
     @Transactional
     public UserResponseDTO updateStudent(Long id, StudentUpdateDTO dto) {
         User user = findStudentOrThrow(id);

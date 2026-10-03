@@ -32,6 +32,7 @@ public class AdminStudentController {
     }
 
     /** GET /api/admin/students?search=optional */
+    // Shows student accounts to the admin and lets them search for a student.
     @GetMapping
     public ResponseEntity<ApiResponseDTO<List<UserResponseDTO>>> getStudents(
             @RequestParam(required = false) String search) {

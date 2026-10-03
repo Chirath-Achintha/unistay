@@ -10,6 +10,7 @@ const API = (function () {
     /**
      * Helper to perform HTTP Requests
      */
+    // Sends a request to the backend and returns the JSON response for the page.
     async function request(endpoint, options = {}) {
         const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
 

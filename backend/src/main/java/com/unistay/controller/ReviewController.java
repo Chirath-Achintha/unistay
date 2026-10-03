@@ -21,12 +21,14 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
+    // Gets all reviews and the average rating for one boarding place.
     @GetMapping("/boarding/{boardingId}")
     public ResponseEntity<ApiResponseDTO<BoardingReviewsDTO>> getBoardingReviews(@PathVariable Long boardingId) {
         BoardingReviewsDTO reviewsDTO = reviewService.getBoardingReviews(boardingId);
         return ResponseEntity.ok(ApiResponseDTO.success("Reviews retrieved successfully", reviewsDTO));
     }
 
+    // Saves a student's feedback about a boarding place after visiting or staying there.
     @PostMapping("/boarding/{boardingId}/student/{studentId}")
     public ResponseEntity<ApiResponseDTO<ReviewResponseDTO>> createReview(
             @PathVariable Long boardingId,

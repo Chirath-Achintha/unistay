@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 /**
  * Switch between Student and Owner registration forms
  */
+// Changes the registration form based on whether the user is signing up as a student or an owner.
 function switchRole(role) {
     const studentTab = document.getElementById('tab-student');
     const ownerTab = document.getElementById('tab-owner');
@@ -53,6 +54,7 @@ function switchRole(role) {
 /**
  * Handle Student Form Submission
  */
+// Sends the student sign-up details to the backend and redirects to the login page afterward.
 async function handleStudentSubmit(event) {
     event.preventDefault();
     clearAlerts();
@@ -110,6 +112,7 @@ async function handleStudentSubmit(event) {
 /**
  * Handle Owner Form Submission
  */
+// Sends the boarding owner sign-up details to the backend and confirms the account was created.
 async function handleOwnerSubmit(event) {
     event.preventDefault();
     clearAlerts();

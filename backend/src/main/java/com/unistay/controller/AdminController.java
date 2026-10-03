@@ -41,6 +41,7 @@ public class AdminController {
      * Body: { "email": "...", "password": "..." }
      * Returns: { "token": "uuid", "adminEmail": "..." }
      */
+    // Validates the admin login and gives a secure session token.
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDTO<Map<String, String>>> login(
             @RequestBody Map<String, String> credentials) {

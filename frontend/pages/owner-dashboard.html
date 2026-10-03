@@ -147,7 +147,7 @@
     <main class="container" style="flex: 1; padding: 4rem 1rem;">
         <div id="alert-container"></div>
 
-        <!-- Owner Profile Bar -->
+        <!-- Shows the owner details and quick actions at the top of the dashboard. -->
         <div class="owner-profile-bar" id="owner-profile-bar" style="display:none;">
             <div class="owner-avatar" id="owner-avatar-initial">O</div>
             <div class="owner-info">
@@ -173,7 +173,7 @@
             </a>
         </div>
 
-        <!-- My Boardings Section -->
+        <!-- Lists all boarding places owned by the logged-in user. -->
         <section>
             <h3 style="margin-bottom: 1.5rem;">My Boardings</h3>
             
@@ -262,6 +262,7 @@
     <script>
         let currentOwner = null;
 
+        // Confirms the user is an owner and loads their profile, boarding list, and visit requests.
         document.addEventListener('DOMContentLoaded', () => {
             const role = sessionStorage.getItem('unistay_user_role');
             if (role !== 'OWNER') {

@@ -138,7 +138,7 @@
             <p>University Student Accommodation Platform</p>
         </div>
 
-        <!-- Login Card -->
+        <!-- Login form for students and owners to access their account and dashboard. -->
         <div class="login-card">
 
             <h2>Welcome Back</h2>
@@ -185,6 +185,7 @@
 
     <script src="../js/admin.js"></script>
     <script>
+        // Checks whether the admin is already signed in and sends them to the admin dashboard.
         document.addEventListener('DOMContentLoaded', () => {
             if (getAdminToken()) {
                 window.location.href = './admin-dashboard.html';
@@ -208,6 +209,7 @@
             }
         });
 
+        // Sends the entered email and password to the backend and redirects the user to the right page.
         async function handleLogin(event) {
             event.preventDefault();
             const alertBox = document.getElementById('alert-container');

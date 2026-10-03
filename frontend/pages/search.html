@@ -241,6 +241,7 @@
             performSearch();
         });
 
+        // Shows the correct login or profile link depending on whether the user is logged in.
         function updateUserNav() {
             const userName = sessionStorage.getItem('unistay_user_name');
             const role = sessionStorage.getItem('unistay_user_role');
@@ -279,6 +280,7 @@
             performSearch();
         }
 
+        // Calls the boarding search API and shows matching results based on the selected filters.
         async function performSearch() {
             const grid = document.getElementById('boardings-grid');
             const emptyState = document.getElementById('empty-state');
@@ -382,6 +384,7 @@
             }
         }
 
+        // Opens the boarding details page and sends the student to login if needed.
         function viewBoardingDetails(id) {
             const userName = sessionStorage.getItem('unistay_user_name');
             if (!userName) {

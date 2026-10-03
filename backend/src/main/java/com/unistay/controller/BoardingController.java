@@ -24,6 +24,7 @@ public class BoardingController {
         this.boardingService = boardingService;
     }
 
+    // Saves a new boarding listing that an owner wants to publish.
     @PostMapping
     public ResponseEntity<ApiResponseDTO<BoardingResponseDTO>> createBoarding(
             @ModelAttribute BoardingRequestDTO dto,
@@ -50,6 +51,7 @@ public class BoardingController {
         return ResponseEntity.ok(ApiResponseDTO.success("Boardings retrieved", boardings));
     }
     
+    // Finds boardings that match the student's selected search filters.
     @GetMapping("/search")
     public ResponseEntity<ApiResponseDTO<List<BoardingResponseDTO>>> searchBoardings(
             @RequestParam(required = false) String city,

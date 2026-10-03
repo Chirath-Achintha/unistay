@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 /**
  * Mobile Navigation Drawer Toggle
  */
+// Opens and closes the small mobile menu when the user taps the menu button.
 function initMobileNav() {
     const mobileBtn = document.querySelector('.mobile-menu-btn');
     const navMenu = document.querySelector('.navbar-nav');
@@ -28,6 +29,7 @@ function initMobileNav() {
 /**
  * Smooth Scrolling for Anchor Links
  */
+// Moves the page smoothly to the clicked section instead of jumping instantly.
 function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -47,6 +49,7 @@ function initSmoothScroll() {
  * Toast Notification Utility
  * Usage: showToast('Welcome to UniStay!', 'success');
  */
+// Shows a small popup message to tell the user a task was successful or failed.
 function showToast(message, type = 'info') {
     let container = document.querySelector('.toast-container');
     if (!container) {
