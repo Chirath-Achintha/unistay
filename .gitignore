@@ -7,8 +7,16 @@
 .env.*
 !.env.example
 
+# --- Spring Boot application.properties with hardcoded secrets ---
+backend/src/main/resources/application.properties
+
+# --- Startup scripts (contain hardcoded passwords and API keys) ---
+backend/start.bat
+backend/start-backend.bat
+
 # --- Maven build outputs ---
 target/
+backend/target/
 *.jar
 *.war
 *.class
@@ -30,3 +38,11 @@ spring-devtools.properties
 # --- Log files ---
 *.log
 logs/
+
+# --- Node.js / npm ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
