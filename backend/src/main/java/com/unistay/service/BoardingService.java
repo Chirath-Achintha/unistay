@@ -163,6 +163,7 @@ public class BoardingService {
         boarding.setHasWifi(dto.getHasWifi());
         boarding.setHasMainRoadAccess(dto.getHasMainRoadAccess());
         boarding.setDistanceFromUniversity(dto.getDistanceFromUniversity());
+        boarding.setContactNumber(dto.getContactNumber());
         return boarding;
     }
 

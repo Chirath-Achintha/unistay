@@ -61,6 +61,8 @@ public class BoardingRequestDTO {
 
     private Double distanceFromUniversity;
 
+    private String contactNumber;
+
     // Getters and Setters
 
     public Long getOwnerId() { return ownerId; }
@@ -134,4 +136,7 @@ public class BoardingRequestDTO {
 
     public Double getDistanceFromUniversity() { return distanceFromUniversity; }
     public void setDistanceFromUniversity(Double distanceFromUniversity) { this.distanceFromUniversity = distanceFromUniversity; }
+
+    public String getContactNumber() { return contactNumber; }
+    public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
 }

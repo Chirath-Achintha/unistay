@@ -10,6 +10,7 @@ public class BoardingResponseDTO {
     private Long id;
     private Long ownerId;
     private String ownerName;
+    private String ownerPhone;
     private String name;
     private String description;
     private String address;
@@ -41,6 +42,10 @@ public class BoardingResponseDTO {
         this.id = boarding.getId();
         this.ownerId = boarding.getOwner().getId();
         this.ownerName = boarding.getOwner().getFullName();
+        // Use the listing's specific contact number if set; otherwise fall back to owner's profile phone
+        String listingContact = boarding.getContactNumber();
+        String ownerProfilePhone = boarding.getOwner().getPhone();
+        this.ownerPhone = (listingContact != null && !listingContact.isBlank()) ? listingContact : ownerProfilePhone;
         this.name = boarding.getName();
         this.description = boarding.getDescription();
         this.address = boarding.getAddress();
@@ -78,6 +83,7 @@ public class BoardingResponseDTO {
     public Long getId() { return id; }
     public Long getOwnerId() { return ownerId; }
     public String getOwnerName() { return ownerName; }
+    public String getOwnerPhone() { return ownerPhone; }
     public String getName() { return name; }
     public String getDescription() { return description; }
     public String getAddress() { return address; }

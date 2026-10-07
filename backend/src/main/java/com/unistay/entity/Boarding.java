@@ -74,6 +74,9 @@ public class Boarding {
     @Column(name = "distance_from_university")
     private Double distanceFromUniversity; // in km
 
+    @Column(name = "contact_number")
+    private String contactNumber;
+
     @OneToMany(mappedBy = "boarding", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardingImage> images = new ArrayList<>();
 
@@ -291,6 +294,14 @@ public class Boarding {
 
     public void setDistanceFromUniversity(Double distanceFromUniversity) {
         this.distanceFromUniversity = distanceFromUniversity;
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
     }
 
     public List<BoardingImage> getImages() {
