@@ -42,6 +42,11 @@ spring.datasource.username=root
 spring.datasource.password=YOUR_PASSWORD_HERE
 ```
 
+### Database ER Diagram
+
+See the [database ER diagram](docs/database-er-diagram.md) for the entities,
+columns, keys, and relationships mapped by the backend.
+
 ---
 
 ## Step 2 – Run the Backend (Spring Boot)
