@@ -119,4 +119,30 @@ public class VisitService {
         Visit saved = visitRepository.save(visit);
         return new VisitResponseDTO(saved);
     }
+
+    /**
+     * Allows a student to cancel/delete one of their own visit requests.
+     */
+    @Transactional
+    public void deleteVisitByStudent(Long visitId, Long studentId) {
+        Visit visit = visitRepository.findByIdAndStudentId(visitId, studentId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Visit request not found or you do not have permission to delete it."));
+        visitRepository.delete(visit);
+    }
+
+    /**
+     * Allows an owner to delete a visit request made for one of their boarding houses.
+     */
+    @Transactional
+    public void deleteVisitByOwner(Long visitId, Long ownerId) {
+        Visit visit = visitRepository.findById(visitId)
+                .orElseThrow(() -> new IllegalArgumentException("Visit request not found."));
+
+        if (!visit.getBoarding().getOwner().getId().equals(ownerId)) {
+            throw new IllegalArgumentException(
+                    "You do not have permission to delete this visit request.");
+        }
+        visitRepository.delete(visit);
+    }
 }

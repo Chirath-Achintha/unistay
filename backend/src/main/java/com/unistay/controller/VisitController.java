@@ -75,4 +75,32 @@ public class VisitController {
                     .body(ApiResponseDTO.error(e.getMessage()));
         }
     }
+
+    /** Student cancels/deletes their own visit request. */
+    @DeleteMapping("/{visitId}/student/{studentId}")
+    public ResponseEntity<ApiResponseDTO<Void>> deleteVisitByStudent(
+            @PathVariable Long visitId,
+            @PathVariable Long studentId) {
+        try {
+            visitService.deleteVisitByStudent(visitId, studentId);
+            return ResponseEntity.ok(ApiResponseDTO.success("Visit request cancelled successfully", null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponseDTO.error(e.getMessage()));
+        }
+    }
+
+    /** Owner removes a visit request from their boarding's schedule. */
+    @DeleteMapping("/{visitId}/owner/{ownerId}")
+    public ResponseEntity<ApiResponseDTO<Void>> deleteVisitByOwner(
+            @PathVariable Long visitId,
+            @PathVariable Long ownerId) {
+        try {
+            visitService.deleteVisitByOwner(visitId, ownerId);
+            return ResponseEntity.ok(ApiResponseDTO.success("Visit request deleted successfully", null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponseDTO.error(e.getMessage()));
+        }
+    }
 }

@@ -565,6 +565,13 @@
                             <input type="date" id="alt-date-${visit.id}" class="form-control" style="width: auto;" min="${new Date().toISOString().split('T')[0]}">
                             <button class="btn btn-outline btn-sm" onclick="ownerProposeDate(${visit.id})">Propose Date</button>
                         </div>
+                        <button class="btn btn-secondary btn-sm" style="margin-left: auto;" onclick="ownerDeleteVisit(${visit.id})" title="Remove this visit request">🗑 Delete</button>
+                    </div>
+                `;
+            } else {
+                actionsHtml = `
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end;">
+                        <button class="btn btn-secondary btn-sm" onclick="ownerDeleteVisit(${visit.id})" title="Remove this visit request">🗑 Delete</button>
                     </div>
                 `;
             }
@@ -619,6 +626,26 @@
                 }
             } catch (err) {
                 alert('Error updating visit status.');
+                console.error(err);
+            }
+        }
+
+        async function ownerDeleteVisit(visitId) {
+            if (!confirm('Are you sure you want to delete this visit request?')) return;
+            const ownerId = sessionStorage.getItem('unistay_user_id');
+            try {
+                const response = await API.delete(`/visits/${visitId}/owner/${ownerId}`);
+                if (response.success) {
+                    const card = document.getElementById(`visit-card-${visitId}`);
+                    if (card) card.remove();
+                    // Show empty state if no visit cards remain
+                    const remaining = document.getElementById('visits-list').children.length;
+                    if (remaining === 0) document.getElementById('visits-empty').style.display = 'block';
+                } else {
+                    alert(response.message || 'Failed to delete visit.');
+                }
+            } catch (err) {
+                alert('Error deleting visit request.');
                 console.error(err);
             }
         }

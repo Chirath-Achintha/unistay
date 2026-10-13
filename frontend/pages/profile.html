@@ -514,6 +514,7 @@
                         list.innerHTML = '';
                         visits.forEach(visit => {
                             const card = document.createElement('div');
+                            card.id = `visit-card-${visit.id}`;
                             card.style.border = '1px solid var(--border-color)';
                             card.style.borderRadius = 'var(--radius-md)';
                             card.style.padding = '1.5rem';
@@ -535,14 +536,19 @@
                             }
 
                             card.innerHTML = `
-                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
-                                    ${visit.boardingName}
-                                </div>
-                                <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
-                                    <strong>Requested Date:</strong> ${visit.requestedDate}
-                                </div>
-                                <div style="padding-top: 1rem; border-top: 1px dashed var(--border-color);">
-                                    ${statusHtml}
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+                                    <div>
+                                        <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
+                                            ${visit.boardingName}
+                                        </div>
+                                        <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                                            <strong>Requested Date:</strong> ${visit.requestedDate}
+                                        </div>
+                                        <div style="padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+                                            ${statusHtml}
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-secondary btn-sm" style="flex-shrink: 0;" onclick="deleteVisit(${visit.id})" title="Cancel this visit request">🗑 Cancel</button>
                                 </div>
                             `;
                             list.appendChild(card);
@@ -572,6 +578,27 @@
                 }
             } catch (err) {
                 alert('Error accepting date.');
+                console.error(err);
+            }
+        }
+
+        async function deleteVisit(visitId) {
+            if (!confirm('Are you sure you want to cancel this visit request?')) return;
+            const studentId = sessionStorage.getItem('unistay_user_id');
+            try {
+                const response = await API.delete(`/visits/${visitId}/student/${studentId}`);
+                if (response.success) {
+                    // Remove the card from the DOM immediately
+                    const card = document.getElementById(`visit-card-${visitId}`);
+                    if (card) card.remove();
+                    // Show empty state if no visits remain
+                    const remaining = document.getElementById('visits-list').children.length;
+                    if (remaining === 0) document.getElementById('visits-empty').style.display = 'block';
+                } else {
+                    alert(response.message || 'Failed to cancel visit.');
+                }
+            } catch (err) {
+                alert('Error cancelling visit request.');
                 console.error(err);
             }
         }

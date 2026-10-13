@@ -37,6 +37,8 @@ public class BoardingResponseDTO {
     private LocalDateTime createdAt;
     
     private List<String> imageUrls;
+    private Double averageRating;
+    private Integer reviewCount;
 
     public BoardingResponseDTO(Boarding boarding) {
         this.id = boarding.getId();
@@ -109,4 +111,8 @@ public class BoardingResponseDTO {
     public Double getDistanceFromUniversity() { return distanceFromUniversity; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public List<String> getImageUrls() { return imageUrls; }
+    public Double getAverageRating() { return averageRating; }
+    public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
+    public Integer getReviewCount() { return reviewCount; }
+    public void setReviewCount(Integer reviewCount) { this.reviewCount = reviewCount; }
 }

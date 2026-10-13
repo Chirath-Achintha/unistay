@@ -49,16 +49,22 @@
             border-radius: var(--radius-lg);
             overflow: hidden;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             transition: transform 0.2s, box-shadow 0.2s;
         }
         .boarding-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
         }
+        .boarding-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
         .b-image-container {
-            width: 100%;
-            height: 200px;
+            flex: 0 0 280px;
+            width: 280px;
+            min-height: 220px;
             background: #e2e8f0;
             display: flex;
             align-items: center;
@@ -76,6 +82,20 @@
             top: 0;
             left: 0;
             z-index: 2;
+        }
+        .ranking-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 3;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            background: var(--primary-color);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1;
+            box-shadow: var(--shadow-md);
         }
         .b-content {
             padding: 1.5rem;
@@ -123,6 +143,40 @@
                 width: 100%;
                 position: static;
             }
+        }
+        @media (max-width: 600px) {
+            .boarding-card {
+                flex-direction: column;
+            }
+            .b-image-container {
+                flex: none;
+                width: 100%;
+                height: 200px;
+            }
+        }
+
+        /* ── Star Rating Badge ── */
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #fff9ec;
+            border: 1px solid #f59e0b;
+            border-radius: 99px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #92400e;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .rating-badge .stars { color: #f59e0b; letter-spacing: -1px; }
+        .rating-badge .rating-count { color: var(--text-muted); font-weight: 400; }
+        .rating-badge.no-reviews {
+            background: var(--bg-alt);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+            font-weight: 400;
         }
     </style>
 </head>
@@ -242,7 +296,7 @@
                     <p class="text-muted">Try adjusting your filters to see more results.</p>
                 </div>
 
-                <div id="boardings-grid" class="grid grid-2" style="gap: 1.5rem;">
+                <div id="boardings-grid" class="boarding-list">
                     <!-- Results injected here -->
                 </div>
             </section>
@@ -314,6 +368,22 @@
             performSearch();
         }
 
+        // Builds a star-rating badge with filled, half, and empty stars.
+        function buildStarRating(avg, count) {
+            if (!count || count === 0) {
+                return `<span class="rating-badge no-reviews">No reviews</span>`;
+            }
+            const full = Math.round(avg);
+            const stars = '★'.repeat(full) + '☆'.repeat(5 - full);
+            const reviewLabel = count === 1 ? 'review' : 'reviews';
+            return `
+                <span class="rating-badge" aria-label="${avg.toFixed(1)} out of 5 from ${count} ${reviewLabel}">
+                    <span class="stars" aria-hidden="true">${stars}</span>
+                    <span>${avg.toFixed(1)} / 5</span>
+                    <span class="rating-count">(${count} ${reviewLabel})</span>
+                </span>`;
+        }
+
         // Fetches boarding houses and applies filter criteria dynamically
         async function performSearch() {
             const grid = document.getElementById('boardings-grid');
@@ -355,7 +425,7 @@
                 if (btnSearch) btnSearch.disabled = false;
 
                 if (response.ok && data.data) {
-                    let results = data.data;
+                    let results = [...data.data];
 
                     // Filter by City / Location (matches location, address, or name)
                     if (city) {
@@ -405,11 +475,15 @@
                     if (hasParking) results = results.filter(b => b.hasParking === true);
 
                     if (results.length > 0) {
-                        grid.style.display = 'grid';
+                        results.sort((a, b) => (Number(b.averageRating) || 0) - (Number(a.averageRating) || 0));
+                        grid.style.display = 'flex';
                         grid.innerHTML = '';
                         resultsCount.textContent = `Showing ${results.length} boarding house${results.length > 1 ? 's' : ''}`;
 
-                        results.forEach(boarding => {
+                        results.forEach((boarding, index) => {
+                            const rankHtml = index < 3
+                                ? `<span class="ranking-badge" aria-label="Ranked number ${index + 1}">#${index + 1}</span>`
+                                : '';
                             let imageUrl = '';
                             if (boarding.imageUrls && boarding.imageUrls.length > 0) {
                                 const raw = boarding.imageUrls[0];
@@ -423,8 +497,9 @@
                                 ? `<div class="b-image-container">
                                      <img src="${imageUrl}" alt="${boarding.name}" class="b-image" onerror="this.style.display='none';" />
                                      <span>🏠</span>
+                                     ${rankHtml}
                                    </div>`
-                                : `<div class="b-image-container"><span>🏠</span></div>`;
+                                : `<div class="b-image-container"><span>🏠</span>${rankHtml}</div>`;
 
                             let facilitiesHtml = [];
                             if (boarding.hasWifi) facilitiesHtml.push('Wi-Fi');
@@ -435,10 +510,18 @@
                             if (boarding.hasParking) facilitiesHtml.push('Parking');
                             const facilitiesStr = facilitiesHtml.length > 0 ? facilitiesHtml.join(' • ') : 'Basic Facilities';
 
+                            // Build star rating HTML
+                            const avg = boarding.averageRating || 0;
+                            const count = boarding.reviewCount || 0;
+                            const ratingHtml = buildStarRating(avg, count);
+
                             card.innerHTML = `
                                 ${imageHtml}
                                 <div class="b-content">
-                                    <div class="b-title">${boarding.name}</div>
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; margin-bottom:0.5rem;">
+                                        <div class="b-title" style="margin-bottom:0;">${boarding.name}</div>
+                                        ${ratingHtml}
+                                    </div>
                                     <div class="b-meta">
                                         📍 <strong>${boarding.location}</strong><br/>
                                         🎓 Near ${boarding.university || 'University'} (${boarding.distanceFromUniversity != null ? boarding.distanceFromUniversity : '?'} km)<br/>

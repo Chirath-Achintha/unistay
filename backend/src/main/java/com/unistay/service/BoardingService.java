@@ -6,7 +6,9 @@ import com.unistay.entity.Boarding;
 import com.unistay.entity.BoardingImage;
 import com.unistay.entity.User;
 import com.unistay.repository.BoardingRepository;
+import com.unistay.repository.ReviewRepository;
 import com.unistay.repository.UserRepository;
+import com.unistay.repository.VisitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +23,20 @@ public class BoardingService {
     private final BoardingRepository boardingRepository;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+    private final VisitRepository visitRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
     public BoardingService(BoardingRepository boardingRepository,
                            UserRepository userRepository,
-                           CloudinaryService cloudinaryService) {
+                           CloudinaryService cloudinaryService,
+                           VisitRepository visitRepository,
+                           ReviewRepository reviewRepository) {
         this.boardingRepository = boardingRepository;
         this.userRepository = userRepository;
         this.cloudinaryService = cloudinaryService;
+        this.visitRepository = visitRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     // Saves a boarding place after checking that the owner is valid and uploading images.
@@ -47,20 +55,20 @@ public class BoardingService {
         handleImageUploads(boarding, images);
 
         Boarding savedBoarding = boardingRepository.save(boarding);
-        return new BoardingResponseDTO(savedBoarding);
+        return enrichWithRating(new BoardingResponseDTO(savedBoarding));
     }
 
     @Transactional(readOnly = true)
     public List<BoardingResponseDTO> getBoardingsByOwner(Long ownerId) {
         return boardingRepository.findByOwnerId(ownerId).stream()
-                .map(BoardingResponseDTO::new)
+                .map(b -> enrichWithRating(new BoardingResponseDTO(b)))
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<BoardingResponseDTO> getAllBoardings() {
         return boardingRepository.findAll().stream()
-                .map(BoardingResponseDTO::new)
+                .map(b -> enrichWithRating(new BoardingResponseDTO(b)))
                 .collect(Collectors.toList());
     }
 
@@ -95,7 +103,7 @@ public class BoardingService {
 
         return boardingRepository.searchBoardings(city, university, roomType, minPrice, maxPrice, minDistance, maxDistance)
                 .stream()
-                .map(BoardingResponseDTO::new)
+                .map(b -> enrichWithRating(new BoardingResponseDTO(b)))
                 .collect(Collectors.toList());
     }
 
@@ -103,7 +111,7 @@ public class BoardingService {
     public BoardingResponseDTO getBoardingById(Long id) {
         Boarding boarding = boardingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Boarding not found"));
-        return new BoardingResponseDTO(boarding);
+        return enrichWithRating(new BoardingResponseDTO(boarding));
     }
 
     @Transactional
@@ -122,10 +130,11 @@ public class BoardingService {
         }
 
         Boarding updatedBoarding = boardingRepository.save(boarding);
-        return new BoardingResponseDTO(updatedBoarding);
+        return enrichWithRating(new BoardingResponseDTO(updatedBoarding));
     }
 
     // Removes a boarding listing only when the owner is allowed to delete it.
+    // Visits and reviews linked to this boarding are deleted first to satisfy FK constraints.
     @Transactional
     public void deleteBoarding(Long id, Long ownerId) {
         Boarding boarding = boardingRepository.findById(id)
@@ -134,6 +143,10 @@ public class BoardingService {
         if (!boarding.getOwner().getId().equals(ownerId)) {
             throw new IllegalArgumentException("You do not have permission to delete this boarding");
         }
+
+        // Remove dependent records before deleting the boarding
+        visitRepository.deleteByBoardingId(id);
+        reviewRepository.deleteByBoardingId(id);
 
         boardingRepository.delete(boarding);
     }
@@ -184,5 +197,19 @@ public class BoardingService {
             boarding.addImage(bImage);
             firstImage = false; // only the first image is primary
         }
+    }
+
+    /**
+     * Populates averageRating and reviewCount on a BoardingResponseDTO from the database.
+     */
+    private BoardingResponseDTO enrichWithRating(BoardingResponseDTO dto) {
+        Double avg = reviewRepository.findAverageRatingByBoardingId(dto.getId());
+        long count = reviewRepository.countByBoardingId(dto.getId());
+        if (avg != null) {
+            avg = Math.round(avg * 10.0) / 10.0;
+        }
+        dto.setAverageRating(avg != null ? avg : 0.0);
+        dto.setReviewCount((int) count);
+        return dto;
     }
 }

@@ -253,6 +253,29 @@
         
         .modal-body { padding: var(--space-lg); }
         .modal-footer { padding: var(--space-md) var(--space-lg); border-top: 1px solid var(--border-color); background: var(--bg-alt); display: flex; justify-content: flex-end; gap: var(--space-sm); }
+
+        /* ── Rating Badge ── */
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #fff9ec;
+            border: 1px solid #f59e0b;
+            border-radius: 99px;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #92400e;
+            white-space: nowrap;
+        }
+        .rating-badge .stars { color: #f59e0b; letter-spacing: -1px; }
+        .rating-badge .rating-count { color: var(--text-muted); font-weight: 400; }
+        .rating-badge.no-reviews {
+            background: var(--bg-alt);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+            font-weight: 400;
+        }
     </style>
 </head>
 <body style="background-color: var(--bg-main); min-height: 100vh; display: flex; flex-direction: column;">
@@ -299,10 +322,11 @@
             
             <div style="margin-bottom: 1.5rem;">
                 <h1 id="b-name" style="margin-bottom: 0.5rem;">Loading...</h1>
-                <div style="display: flex; gap: 10px; align-items: center; color: var(--text-muted);">
+                <div style="display: flex; gap: 10px; align-items: center; color: var(--text-muted); flex-wrap: wrap;">
                     <span>📍 <span id="b-location"></span></span>
                     <span>•</span>
                     <span>🎓 Near <span id="b-university"></span> (<span id="b-distance"></span> km)</span>
+                    <span id="b-rating-badge"></span>
                 </div>
             </div>
 
@@ -553,6 +577,27 @@
             document.getElementById('b-university').textContent = b.university || 'University';
             document.getElementById('b-distance').textContent = b.distanceFromUniversity || '?';
             document.getElementById('b-price').textContent = b.pricePerMonth;
+
+            // Rating badge under the title
+            const badgeEl = document.getElementById('b-rating-badge');
+            if (badgeEl) {
+                const avg   = b.averageRating || 0;
+                const count = b.reviewCount   || 0;
+                if (count === 0) {
+                    badgeEl.innerHTML = `<span class="rating-badge no-reviews">No reviews yet</span>`;
+                } else {
+                    const full  = Math.floor(avg);
+                    const half  = (avg - full) >= 0.5 ? 1 : 0;
+                    const empty = 5 - full - half;
+                    const stars = '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+                    badgeEl.innerHTML = `
+                        <span class="rating-badge">
+                            <span class="stars">${stars}</span>
+                            <span>${avg.toFixed(1)}</span>
+                            <span class="rating-count">(${count} review${count > 1 ? 's' : ''})</span>
+                        </span>`;
+                }
+            }
             
             document.getElementById('b-roomType').textContent = `🏠 ${b.roomType}`;
             document.getElementById('b-sidebar-roomType').textContent = b.roomType;
